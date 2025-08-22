@@ -13,23 +13,29 @@ public class BoardPedal extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
     private Board board;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedal_id")
     private Pedal pedal;
 
     private int orderIndex; // 보드 내 페달 순서
 
-    public static BoardPedal create(Board board, Pedal pedal, int orderIndex) {
-        return new BoardPedal(board, pedal, orderIndex);
-    }
-
     protected BoardPedal(Board board, Pedal pedal, int orderIndex) {
         this.board = board;
         this.pedal = pedal;
         this.orderIndex = orderIndex;
+    }
+
+    //<-- 객체 생성 정적 메서드 -->
+    public static BoardPedal create(Board board, Pedal pedal, int orderIndex) {
+        return new BoardPedal(board, pedal, orderIndex);
+    }
+
+    //<-- 수정 메서드 -->
+    public void changeOrderIndex(int index) {
+        this.orderIndex = index;
     }
 }

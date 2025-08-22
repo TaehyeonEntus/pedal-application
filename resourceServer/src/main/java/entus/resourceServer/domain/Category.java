@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,15 +24,19 @@ public class Category extends BaseEntity {
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
-    private List<Category> children;
+    private List<Category> children = new ArrayList<>();
 
-
-    public static Category create(String name, Category parent) {
-        return new Category(name, parent);
-    }
 
     protected Category(String name, Category parent) {
         this.name = name;
         this.parent = parent;
+    }
+
+    //<-- 객체 생성 정적 메서드 + 편의 메서드 -->
+    public static Category create(String name, Category parent) {
+        Category category = new Category(name, parent);
+        if (parent != null)
+            parent.getChildren().add(category);
+        return category;
     }
 }
