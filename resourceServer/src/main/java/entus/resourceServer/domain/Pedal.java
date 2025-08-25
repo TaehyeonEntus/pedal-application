@@ -21,6 +21,8 @@ public class Pedal extends BaseEntity{
     @JoinColumn(name = "category_id")
     private Category category;
 
+    private String imageUrl;
+
     protected Pedal(String name, String description, Category category) {
         this.name = name;
         this.description = description;
@@ -29,7 +31,9 @@ public class Pedal extends BaseEntity{
 
     //<-- 객체 생성 정적 메서드 -->
     public static Pedal create(String name, String description, Category category) {
-        return new Pedal(name,description,category);
+        Pedal pedal = new Pedal(name, description, category);
+        pedal.changeImageUrl("/uploads/pedals/pedal.png");
+        return pedal;
     }
 
     //<-- 수정 메서드 -->
@@ -43,5 +47,9 @@ public class Pedal extends BaseEntity{
 
     public void changeCategory(Category newCategory) {
         this.category = newCategory;
+    }
+
+    public void changeImageUrl(String newImageUrl) {
+        this.imageUrl = newImageUrl;
     }
 }
