@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>보드 상세</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .board-header { display: flex; align-items: center; margin-bottom: 20px; }
+        .board-header img { width: 200px; height: 200px; object-fit: cover; margin-right: 20px; }
+        .board-info { display: flex; flex-direction: column; }
+        .board-info h1 { margin: 0 0 10px 0; }
+        .pedal-list { display: flex; flex-wrap: wrap; gap: 15px; }
+        .pedal-item { width: 150px; text-align: center; }
+        .pedal-item img { width: 150px; height: 150px; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+<div class="board-header">
+    <img id="boardImage" src="/images/board_default.png" alt="Board Image">
+    <div class="board-info">
+        <h1 id="boardName">보드 이름</h1>
+        <p>작성자: <span id="boardOwner"></span></p>
+        <p id="boardDescription"></p>
+    </div>
+</div>
+
+<hr>
+
+<div class="pedal-list" id="pedalList">
+    <!-- JS로 페달 아이템 추가 -->
+</div>
+
+<script type="module">
+    import { loadProtectedData } from "/js/apiRequest.js";
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const boardId = getBoardIdFromPath();
+        const boardData = await fetchBoardData(boardId);
+        if (!boardData) return;
+
+        renderBoardInfo(boardData);
+        renderPedalList(boardData.pedals || []);
+    });
+
+    // URL에서 boardId 추출
+    function getBoardIdFromPath() {
+        const pathParts = window.location.pathname.split('/');
+        return pathParts[pathParts.length - 1];
+    }
+
+    // API 요청
+    async function fetchBoardData(boardId) {
+        try {
+            return await loadProtectedData(`/api/board/${boardId}`);
+        } catch (err) {
+            console.error("보드 데이터를 불러오지 못했습니다.", err);
+            return null;
+        }
+    }
+
+    // 보드 정보 렌더링
+    function renderBoardInfo(board) {
+        document.getElementById('boardName').textContent = board.boardName;
+        document.getElementById('boardOwner').textContent = board.boardOwner;
+        document.getElementById('boardDescription').textContent = board.boardDescription;
+        document.getElementById('boardImage').src = board.boardImageUrl || '/images/board_default.png';
+    }
+
+    function renderPedalList(pedals) {
+        const pedalList = document.getElementById('pedalList');
+        pedalList.innerHTML = '';
+
+        pedals.forEach((pedal, index) => {
+            console.log(pedal.pedalName, pedal.pedalImageUrl, pedal.categoryName);
+
+            const div = document.createElement('div');
+            div.className = 'pedal-item';
+            div.innerHTML = `
+            <img src="${pedal.pedalImageUrl || '/images/pedal_default.png'}" alt="Pedal Image">
+            <p>${pedal.pedalName || '-'}</p>
+            <p>${pedal.categoryName || '-'}</p>
+        `;
+            pedalList.appendChild(div);
+
+            // 마지막 페달이 아니면 → 추가
+            if (index < pedals.length - 1) {
+                const arrow = document.createElement('span');
+                arrow.textContent = '→';
+                arrow.style.alignSelf = 'center';
+                arrow.style.margin = '0 10px';
+                pedalList.appendChild(arrow);
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

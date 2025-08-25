@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Pedal App Home</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        img { width: 80px; height: 80px; object-fit: cover; }
+        section { margin-bottom: 40px; }
+        button { margin-top: 10px; padding: 5px 10px; }
+        header, footer { text-align: center; margin: 20px 0; }
+        nav a { margin: 0 10px; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Pedal App</h1>
+    <nav>
+        <a href="/home">Home</a> |
+        <a href="/boards">Boards</a> |
+        <a href="/pedals">Pedals</a>
+    </nav>
+</header>
+
+<main>
+    <section id="boards-section">
+        <h2>최신 보드 20개</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>번호</th>
+                <th>이미지</th>
+                <th>이름</th>
+                <th>설명</th>
+                <th>등록일</th>
+            </tr>
+            </thead>
+            <tbody id="boards"></tbody>
+        </table>
+        <button onclick="window.location.href='/boards'">보드 더보기</button>
+    </section>
+
+    <section id="pedals-section">
+        <h2>최신 페달 20개</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>번호</th>
+                <th>이미지</th>
+                <th>이름</th>
+                <th>카테고리</th>
+                <th>설명</th>
+                <th>등록일</th>
+            </tr>
+            </thead>
+            <tbody id="pedals"></tbody>
+        </table>
+        <button onclick="window.location.href='/pedals'">페달 더보기</button>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2025 Pedal App</p>
+</footer>
+
+<script type="module">
+    import { loadProtectedData } from "/js/apiRequest.js";
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        const data = await loadProtectedData("/api/home");
+
+        if (!data) {
+            console.error("홈 데이터를 불러오지 못했습니다.");
+            return;
+        }
+
+        renderBoards(data.boards || []);
+        renderPedals(data.pedals || []);
+    });
+
+    function renderBoards(boards) {
+        const boardsTbody = document.getElementById("boards");
+        boardsTbody.innerHTML = "";
+        boards.forEach((b, i) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td><img src="${b.boardImageUrl || '/images/board_default.png'}" alt="board image"></td>
+                <td><a href="/board/${b.boardId}">${b.boardName}</a></td>
+                <td>${b.boardDescription || '-'}</td>
+                <td>${new Date(b.createdAt).toLocaleDateString()}</td>
+            `;
+            boardsTbody.appendChild(tr);
+        });
+    }
+
+    function renderPedals(pedals) {
+        const pedalsTbody = document.getElementById("pedals");
+        pedalsTbody.innerHTML = "";
+        pedals.forEach((p, i) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${i + 1}</td>
+                <td><img src="${p.pedalImageUrl || '/images/pedal_default.png'}" alt="pedal image"></td>
+                <td>${p.pedalName}</td>
+                <td>${p.categoryName}</td>
+                <td>${p.pedalDescription || '-'}</td>
+                <td>${new Date(p.createdAt).toLocaleDateString()}</td>
+            `;
+            pedalsTbody.appendChild(tr);
+        });
+    }
+</script>
+</body>
+</html>
