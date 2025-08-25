@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PedalRepository extends JpaRepository<Pedal, Long> {
     List<Pedal> findByCategory(Category category);
+
+    List<Pedal> findTop20ByOrderByIdDesc();
 }
