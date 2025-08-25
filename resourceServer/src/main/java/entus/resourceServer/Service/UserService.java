@@ -17,4 +17,8 @@ public class UserService {
     public Long add(User user) {
         return userRepository.save(user).getId();
     }
+
+    public void syncUser(Long userId) {
+        userRepository.findById(userId).orElseGet(() -> userRepository.save(User.create(userId)));
+    }
 }
