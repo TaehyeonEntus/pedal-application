@@ -6,28 +6,34 @@ import entus.resourceServer.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardRepository boardRepository;
 
-    public Board get(Long boardId){
+    public Board get(Long boardId) {
         return boardRepository.findById(boardId).orElse(null);
     }
 
-    public Long add(Board board){
+    public Long add(Board board) {
         return boardRepository.save(board).getId();
     }
 
-    public void movePedal(Board board, Pedal pedal, int index){
+    public void movePedal(Board board, Pedal pedal, int index) {
         board.movePedal(pedal, index);
     }
 
-    public void swapPedal(Board board, Pedal pedal1, Pedal pedal2){
+    public void swapPedal(Board board, Pedal pedal1, Pedal pedal2) {
         board.swapPedal(pedal1, pedal2);
     }
 
-    public void removePedal(Board board, Pedal pedal){
+    public void removePedal(Board board, Pedal pedal) {
         board.removePedal(pedal);
+    }
+
+    public List<Board> get20() {
+        return boardRepository.findTop20ByOrderByIdDesc();
     }
 }

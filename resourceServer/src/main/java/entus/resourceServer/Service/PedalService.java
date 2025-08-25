@@ -39,4 +39,8 @@ public class PedalService {
 
         return pedals;
     }
+
+    public List<Pedal> get20(){
+        return pedalRepository.findTop20ByOrderByIdDesc();
+    }
 }
