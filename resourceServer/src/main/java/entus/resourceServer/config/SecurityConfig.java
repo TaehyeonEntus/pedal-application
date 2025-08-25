@@ -27,9 +27,9 @@ public class SecurityConfig {
                 .sessionManagement((configurer) -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/public","/").permitAll()
-                        .requestMatchers("/user").hasRole("user")
-                        .requestMatchers("/admin").hasRole("admin")
+                        .requestMatchers("/favicon.ico","/public","/home","/","/js/**","/addTestData","/board/*").permitAll()
+                        .requestMatchers("/user","/api/**").hasRole("USER")
+                        .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
