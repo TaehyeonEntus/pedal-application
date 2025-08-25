@@ -1,5 +1,6 @@
 package entus.resourceServer.filter.token;
 
+import entus.resourceServer.Service.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
@@ -28,9 +29,11 @@ import java.util.List;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final SecretKey secretKey;
+    private final UserService userService;
 
-    public JwtAuthenticationFilter(@Value("${JWT_SECRET}") String secret) {
+    public JwtAuthenticationFilter(@Value("${JWT_SECRET}") String secret, UserService userService) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.userService = userService;
     }
 
     @Override
@@ -74,6 +77,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
         Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
+
+        // 4. 처음 접속한 유저는 DB에 등록
+        userService.syncUser(Long.parseLong(userId));
 
         filterChain.doFilter(request, response);
     }
