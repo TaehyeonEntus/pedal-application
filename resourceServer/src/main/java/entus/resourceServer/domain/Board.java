@@ -24,6 +24,12 @@ public class Board extends BaseEntity {
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     private List<BoardPedal> pedals = new ArrayList<>();
 
+    private String name;
+
+    private String description;
+
+    private String imageUrl;
+
     protected Board(User user) {
         this.user = user;
     }
@@ -32,6 +38,7 @@ public class Board extends BaseEntity {
     public static Board create(User user) {
         Board board = new Board(user);
         user.getBoards().add(board);
+        board.changeImageUrl("/uploads/boards/board.jpg");
         return board;
     }
 
@@ -100,5 +107,9 @@ public class Board extends BaseEntity {
         pedals.stream()
                 .filter(bp -> bp.getOrderIndex() > index)
                 .forEach(bp -> bp.changeOrderIndex(bp.getOrderIndex() - 1));
+    }
+
+    public void changeImageUrl(String newImageUrl){
+        this.imageUrl = newImageUrl;
     }
 }
