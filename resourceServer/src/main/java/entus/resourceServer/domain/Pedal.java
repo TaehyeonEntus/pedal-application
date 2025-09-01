@@ -5,6 +5,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Pedal은 Board에 속할 수도, 속하지 않을 수 있음
+ * Board에서는 그냥 외래키만 가져다 쓰는 방식
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

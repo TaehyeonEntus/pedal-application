@@ -1,8 +1,7 @@
 package entus.resourceServer.exception;
 
 public class AccessTokenException extends RuntimeException {
-    public AccessTokenException() {
-    }
+    public AccessTokenException() {}
 
     public AccessTokenException(String message) {
         super(message);

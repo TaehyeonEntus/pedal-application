@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 페달들로 이루어진 보드
+ * N:M 맵핑이라 중간테이블 (BoardPedal)에서 페달 순서 관리
+ * move, swap, delete는 보드 내 규칙인 orderIndex에 위배되지 않아야 하기 때문에 도메인 레벨에 붙였음...
+ * 각 메서드는 서비스 레이어에서 할당받아서 쓰고있음
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
