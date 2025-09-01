@@ -40,7 +40,7 @@
         if (!boardData) return;
 
         renderBoardInfo(boardData);
-        renderPedalList(boardData.pedals || []);
+        renderPedalList(boardId, boardData.pedals || []);
     });
 
     // URL에서 boardId 추출
@@ -59,6 +59,70 @@
         }
     }
 
+    // 페달 삭제
+    async function deletePedal(boardId, pedalId) {
+        try {
+            const response = await fetch(`/api/board/${boardId}/delete`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include", // 쿠키 기반 인증
+                body: JSON.stringify({ pedalId })
+            });
+
+            if (!response.ok) throw new Error("Delete failed");
+
+            return await response.json();
+        } catch (err) {
+            console.error("deletePedal fail", err);
+            return null;
+        }
+    }
+
+    // 페달 이동
+    async function movePedal(boardId, pedalId, destination) {
+        try {
+            const response = await fetch(`/api/board/${boardId}/move`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include", // 쿠키 기반 인증
+                body: JSON.stringify({ pedalId, destination })
+            });
+
+            if (!response.ok) throw new Error("Move failed");
+
+            return await response.json();
+        } catch (err) {
+            console.error("movePedal fail", err);
+            return null;
+        }
+    }
+
+    // 페달 스왑
+    async function swapPedal(boardId, pedal1Id, pedal2Id) {
+        try {
+            const response = await fetch(`/api/board/${boardId}/swap`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include", // 쿠키 기반 인증
+                body: JSON.stringify({ pedal1Id, pedal2Id })
+            });
+
+            if (!response.ok) throw new Error("Swap failed");
+
+            return await response.json();
+        } catch (err) {
+            console.error("swapPedal fail", err);
+            return null;
+        }
+    }
+
+
     // 보드 정보 렌더링
     function renderBoardInfo(board) {
         document.getElementById('boardName').textContent = board.boardName;
@@ -67,23 +131,55 @@
         document.getElementById('boardImage').src = board.boardImageUrl || '/images/board_default.png';
     }
 
-    function renderPedalList(pedals) {
+    // renderPedalList 수정
+    function renderPedalList(boardId, pedals) {
         const pedalList = document.getElementById('pedalList');
         pedalList.innerHTML = '';
 
         pedals.forEach((pedal, index) => {
-            console.log(pedal.pedalName, pedal.pedalImageUrl, pedal.categoryName);
-
             const div = document.createElement('div');
             div.className = 'pedal-item';
             div.innerHTML = `
             <img src="${pedal.pedalImageUrl || '/images/pedal_default.png'}" alt="Pedal Image">
             <p>${pedal.pedalName || '-'}</p>
             <p>${pedal.categoryName || '-'}</p>
+            <button class="delete-btn">삭제</button>
+            <button class="move-btn">이동</button>
+            <button class="swap-btn">스왑</button>
         `;
             pedalList.appendChild(div);
 
-            // 마지막 페달이 아니면 → 추가
+            // 삭제 버튼
+            div.querySelector('.delete-btn').addEventListener('click', async () => {
+                if (!confirm(`"${pedal.pedalName}"를 삭제하시겠습니까?`)) return;
+                const updatedBoard = await deletePedal(boardId, pedal.pedalId);
+                if (updatedBoard) renderPedalList(boardId, updatedBoard.pedals);
+            });
+
+            // 이동 버튼
+            div.querySelector('.move-btn').addEventListener('click', async () => {
+                const destination = parseInt(prompt('몇 번째 위치로 이동하시겠습니까? (0부터 시작)'), 10);
+                if (isNaN(destination) || destination < 0 || destination >= pedals.length) {
+                    alert('잘못된 위치입니다.');
+                    return;
+                }
+                const updatedBoard = await movePedal(boardId, pedal.pedalId, destination);
+                if (updatedBoard) renderPedalList(boardId, updatedBoard.pedals);
+            });
+
+            // 스왑 버튼
+            div.querySelector('.swap-btn').addEventListener('click', async () => {
+                const otherIndex = parseInt(prompt('교체할 페달의 번호를 입력하세요 (0부터 시작)'), 10);
+                if (isNaN(otherIndex) || otherIndex < 0 || otherIndex >= pedals.length || otherIndex === index) {
+                    alert('잘못된 번호입니다.');
+                    return;
+                }
+                const otherPedal = pedals[otherIndex];
+                const updatedBoard = await swapPedal(boardId, pedal.pedalId, otherPedal.pedalId);
+                if (updatedBoard) renderPedalList(boardId, updatedBoard.pedals);
+            });
+
+            // 화살표
             if (index < pedals.length - 1) {
                 const arrow = document.createElement('span');
                 arrow.textContent = '→';
@@ -93,6 +189,7 @@
             }
         });
     }
+
 </script>
 
 </body>

@@ -5,6 +5,7 @@ import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardRepository boardRepository;
-
+    private final PedalService pedalService;
     public Board get(Long boardId) {
         return boardRepository.findById(boardId).orElse(null);
     }
@@ -21,16 +22,29 @@ public class BoardService {
         return boardRepository.save(board).getId();
     }
 
-    public void movePedal(Board board, Pedal pedal, int index) {
+    @Transactional
+    public Board movePedal(long boardId, long pedalId, int index) {
+        Board board = this.get(boardId);
+        Pedal pedal = pedalService.get(pedalId);
         board.movePedal(pedal, index);
+        return board;
     }
 
-    public void swapPedal(Board board, Pedal pedal1, Pedal pedal2) {
+    @Transactional
+    public Board swapPedal(long boardId, long pedal1Id, long pedal2Id) {
+        Board board = this.get(boardId);
+        Pedal pedal1 = pedalService.get(pedal1Id);
+        Pedal pedal2 = pedalService.get(pedal2Id);
         board.swapPedal(pedal1, pedal2);
+        return board;
     }
 
-    public void removePedal(Board board, Pedal pedal) {
+    @Transactional
+    public Board removePedal(long boardId, long pedalId) {
+        Board board = this.get(boardId);
+        Pedal pedal = pedalService.get(pedalId);
         board.removePedal(pedal);
+        return board;
     }
 
     public List<Board> get20() {
