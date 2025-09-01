@@ -6,6 +6,7 @@ import entus.resourceServer.filter.token.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,9 +28,11 @@ public class SecurityConfig {
                 .sessionManagement((configurer) -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/favicon.ico","/public","/home","/","/js/**","/addTestData","/board/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/**").authenticated()
+                        .requestMatchers("/favicon.ico","/public","/home","/","/js/**","/addTestData","/board/**").permitAll()
                         .requestMatchers("/user","/api/**").hasRole("USER")
                         .requestMatchers("/admin").hasRole("ADMIN")
+
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
