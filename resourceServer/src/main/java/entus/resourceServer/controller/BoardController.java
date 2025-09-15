@@ -1,50 +1,61 @@
 package entus.resourceServer.controller;
 
 import entus.resourceServer.Service.BoardService;
-import entus.resourceServer.Service.PedalService;
+import entus.resourceServer.Service.UserService;
 import entus.resourceServer.domain.Board;
-import entus.resourceServer.domain.dto.BoardDetailDto;
-import entus.resourceServer.domain.dto.DeletePedalDto;
-import entus.resourceServer.domain.dto.MovePedalDto;
-import entus.resourceServer.domain.dto.SwapPedalDto;
+import entus.resourceServer.domain.User;
+import entus.resourceServer.domain.dto.request.AddBoardRequestDto;
+import entus.resourceServer.domain.dto.request.DeletePedalRequestDto;
+import entus.resourceServer.domain.dto.request.MovePedalRequestDto;
+import entus.resourceServer.domain.dto.request.SwapPedalRequestDto;
+import entus.resourceServer.domain.dto.response.BoardDetailDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RequestMapping("/board")
+@RestController
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
-    private final PedalService pedalService;
-    @GetMapping("/board/{boardId}")
-    public String board(@PathVariable String boardId) {
-        return "boardDetail";
+    private final UserService userService;
+
+    @PostMapping("/add")
+    public ResponseEntity<?> addBoard(Authentication authentication, @RequestBody AddBoardRequestDto dto){
+        User user = userService.get(Long.parseLong((String) authentication.getPrincipal()));
+
+        Board board = Board.create(user);
+        board.changeName(dto.getName());
+        board.changeDescription(dto.getDescription());
+        board.changeImageUrl(dto.getImageUrl());
+
+        Long boardId = boardService.add(board);
+
+        return ResponseEntity.ok().body(boardId);
     }
 
-    @GetMapping("/api/board/{boardId}")
-    @ResponseBody
-    public BoardDetailDto apiBoard(@PathVariable Long boardId) {
-        return new BoardDetailDto(boardService.get(boardId));
-    }
-
-    @PostMapping("/api/board/{boardId}/delete")
-    @ResponseBody
-    public BoardDetailDto deletePedal(@PathVariable Long boardId, @RequestBody DeletePedalDto deletePedalDto) {
-        Board board = boardService.removePedal(boardId, deletePedalDto.getPedalId());
+    @PostMapping("/{boardId}/add/{pedalId}")
+    public BoardDetailDto addPedal(@PathVariable Long boardId, @PathVariable Long pedalId){
+        Board board = boardService.addPedal(boardId, pedalId);
         return new BoardDetailDto(board);
     }
 
-    @PostMapping("/api/board/{boardId}/move")
-    @ResponseBody
-    public BoardDetailDto movePedal(@PathVariable Long boardId, @RequestBody MovePedalDto movePedalDto) {
-        Board board = boardService.movePedal(boardId, movePedalDto.getPedalId(), movePedalDto.getDestination());
+    @PostMapping("/{boardId}/delete")
+    public BoardDetailDto deletePedal(@PathVariable Long boardId, @RequestBody DeletePedalRequestDto dto) {
+        Board board = boardService.removePedal(boardId, dto.getPedalId());
         return new BoardDetailDto(board);
     }
 
-    @PostMapping("/api/board/{boardId}/swap")
-    @ResponseBody
-    public BoardDetailDto swapPedal(@PathVariable Long boardId, @RequestBody SwapPedalDto swapPedalDto) {
-        Board board = boardService.swapPedal(boardId, swapPedalDto.getPedal1Id(), swapPedalDto.getPedal2Id());
+    @PostMapping("/{boardId}/move")
+    public BoardDetailDto movePedal(@PathVariable Long boardId, @RequestBody MovePedalRequestDto dto) {
+        Board board = boardService.movePedal(boardId, dto.getPedalId(), dto.getDestination());
+        return new BoardDetailDto(board);
+    }
+
+    @PostMapping("/{boardId}/swap")
+    public BoardDetailDto swapPedal(@PathVariable Long boardId, @RequestBody SwapPedalRequestDto dto) {
+        Board board = boardService.swapPedal(boardId, dto.getPedal1Id(), dto.getPedal2Id());
         return new BoardDetailDto(board);
     }
 }
