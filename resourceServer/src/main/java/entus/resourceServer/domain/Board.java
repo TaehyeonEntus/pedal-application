@@ -52,6 +52,19 @@ public class Board extends BaseEntity {
         this.pedals.add(BoardPedal.create(this, pedal, getPedals().size()));
     }
 
+    //<-- 수정 메서드 -->
+    public void changeName(String name) {
+        this.name = name;
+    }
+
+    public void changeDescription(String description) {
+        this.description = description;
+    }
+
+    public void changeImageUrl(String newImageUrl){
+        this.imageUrl = newImageUrl;
+    }
+
     //<-- 비즈니스 메서드 -->
     public void movePedal(Pedal pedal, int newIndex) {
         //인덱스 범위 초과
@@ -113,9 +126,5 @@ public class Board extends BaseEntity {
         pedals.stream()
                 .filter(bp -> bp.getOrderIndex() > index)
                 .forEach(bp -> bp.changeOrderIndex(bp.getOrderIndex() - 1));
-    }
-
-    public void changeImageUrl(String newImageUrl){
-        this.imageUrl = newImageUrl;
     }
 }
