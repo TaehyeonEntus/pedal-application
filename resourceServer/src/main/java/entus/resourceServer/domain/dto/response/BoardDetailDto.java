@@ -1,4 +1,4 @@
-package entus.resourceServer.domain.dto;
+package entus.resourceServer.domain.dto.response;
 
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.BoardPedal;

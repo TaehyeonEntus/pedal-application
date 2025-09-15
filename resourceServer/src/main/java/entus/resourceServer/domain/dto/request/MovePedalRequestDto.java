@@ -1,9 +1,9 @@
-package entus.resourceServer.domain.dto;
+package entus.resourceServer.domain.dto.request;
 
 import lombok.Data;
 
 @Data
-public class MovePedalDto {
+public class MovePedalRequestDto {
     private long pedalId;
     private int destination;
 }
