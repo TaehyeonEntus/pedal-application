@@ -14,12 +14,21 @@ import java.util.List;
 public class BoardService {
     private final BoardRepository boardRepository;
     private final PedalService pedalService;
+
     public Board get(Long boardId) {
         return boardRepository.findById(boardId).orElse(null);
     }
 
     public Long add(Board board) {
         return boardRepository.save(board).getId();
+    }
+
+    @Transactional
+    public Board addPedal(long boardId, long pedalId) {
+        Board board = this.get(boardId);
+        Pedal pedal = pedalService.get(pedalId);
+        board.addPedal(pedal);
+        return board;
     }
 
     @Transactional
