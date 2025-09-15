@@ -4,9 +4,9 @@ import entus.resourceServer.exception.CustomAccessDeniedHandler;
 import entus.resourceServer.exception.CustomAuthenticationEntryPoint;
 import entus.resourceServer.filter.token.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -28,9 +28,14 @@ public class SecurityConfig {
                 .sessionManagement((configurer) -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(HttpMethod.POST, "/**").authenticated()
-                        .requestMatchers("/favicon.ico","/public","/home","/","/js/**","/addTestData","/board/**").permitAll()
-                        .requestMatchers("/user","/api/**").hasRole("USER")
+                        .requestMatchers(EndpointRequest.to("prometheus")).permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/js/**", "/css/**", "/images/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/","/home","/board","/board/**").permitAll()
+                        .requestMatchers("/addTestData").permitAll()
+                        .requestMatchers("/public").permitAll()
+                        .requestMatchers("/user").hasAnyRole("USER","ADMIN")
                         .requestMatchers("/admin").hasRole("ADMIN")
 
                         .anyRequest().authenticated())
