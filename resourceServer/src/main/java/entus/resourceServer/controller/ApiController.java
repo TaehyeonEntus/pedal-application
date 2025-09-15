@@ -4,34 +4,28 @@ import entus.resourceServer.Service.BoardService;
 import entus.resourceServer.Service.PedalService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
-import entus.resourceServer.domain.dto.BoardListDto;
-import entus.resourceServer.domain.dto.HomeDto;
-import entus.resourceServer.domain.dto.PedalListDto;
+import entus.resourceServer.domain.dto.page.HomePageDto;
+import entus.resourceServer.domain.dto.response.BoardDetailDto;
+import entus.resourceServer.domain.dto.response.BoardListDto;
+import entus.resourceServer.domain.dto.response.PedalListDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RequestMapping("/api")
+@RestController
 @RequiredArgsConstructor
-public class HomeController {
-    private final PedalService pedalService;
+public class ApiController {
     private final BoardService boardService;
+    private final PedalService pedalService;
 
     @GetMapping("/home")
-    public String home() {
-        return "home";
-    }
-
-    @ResponseBody
-    @GetMapping("/api/home")
-    public HomeDto apiHome() {
+    public HomePageDto apiHome() {
         List<Board> boardService20 = boardService.get20();
         List<Pedal> pedalService20 = pedalService.get20();
 
-        return new HomeDto(
+        return new HomePageDto(
                 boardService20
                         .stream()
                         .map(BoardListDto::new)
@@ -41,4 +35,11 @@ public class HomeController {
                         .map(PedalListDto::new)
                         .toList());
     }
+
+    @GetMapping("/board/{boardId}")
+    public BoardDetailDto apiBoard(@PathVariable Long boardId) {
+        return new BoardDetailDto(boardService.get(boardId));
+    }
+
+
 }

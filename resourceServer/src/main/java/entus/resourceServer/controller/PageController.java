@@ -23,11 +23,16 @@ public class PageController {
 
     @GetMapping("/board")
     public String board() {
-        return "board";
+        return "viewBoards";
+    }
+
+    @GetMapping("/board/{pedalId}")
+    public String pedalDetail(@PathVariable String pedalId) {
+        return "viewPedal";
     }
 
     @GetMapping("/pedal")
     public String pedal() {
-        return "pedal";
+        return "viewPedals";
     }
 }
