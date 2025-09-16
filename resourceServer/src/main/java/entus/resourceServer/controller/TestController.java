@@ -21,10 +21,6 @@ public class TestController {
     private final PedalService pedalService;
     private final BoardService boardService;
     private final CategoryService categoryService;
-    @GetMapping("/")
-    public String home(){
-        return "redirect:/home";
-    }
 
     @GetMapping("/addTestData")
     @Transactional
