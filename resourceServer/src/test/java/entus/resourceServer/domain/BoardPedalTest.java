@@ -49,7 +49,7 @@ class BoardPedalTest {
         Pedal pedal2 = Pedal.create("페달2", "설명2", category);
         pedalRepository.save(pedal2);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         BoardPedal boardPedal1 = BoardPedal.create(board, pedal1, 1);
@@ -84,7 +84,7 @@ class BoardPedalTest {
         Pedal pedal2 = Pedal.create("페달2", "설명2", category);
         pedalRepository.save(pedal2);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         BoardPedal boardPedal1 = BoardPedal.create(board, pedal1, 1);
@@ -119,7 +119,7 @@ class BoardPedalTest {
         Pedal pedal2 = Pedal.create("페달2", "설명2", category);
         pedalRepository.save(pedal2);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         BoardPedal boardPedal1 = BoardPedal.create(board, pedal1, 1);
@@ -154,7 +154,7 @@ class BoardPedalTest {
         Pedal pedal2 = Pedal.create("페달2", "설명2", category);
         pedalRepository.save(pedal2);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         BoardPedal boardPedal1 = BoardPedal.create(board, pedal1, 1);

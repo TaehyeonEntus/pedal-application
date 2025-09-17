@@ -67,7 +67,7 @@ class UserTest {
         User user = User.create(userId);
         User savedUser = userRepository.save(user);
 
-        Board board = Board.create(savedUser);
+        Board board = Board.create(savedUser,"board1","설명1");
         Board savedBoard = boardRepository.save(board);
 
         //when

@@ -44,7 +44,7 @@ class BoardTest {
         User user = User.create(userId);
         userRepository.save(user);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         Board savedBoard = boardRepository.save(board);
 
         //when
@@ -62,7 +62,7 @@ class BoardTest {
         User user = User.create(userId);
         userRepository.save(user);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         Board savedBoard = boardRepository.save(board);
 
         //when
@@ -80,7 +80,7 @@ class BoardTest {
         User user = User.create(userId);
         User savedUser = userRepository.save(user);
 
-        Board board = Board.create(savedUser);
+        Board board = Board.create(savedUser,"board1","설명1");
         Board savedBoard = boardRepository.save(board);
 
         Category category = Category.create("drive", null);
@@ -115,7 +115,7 @@ class BoardTest {
         User user = User.create(userId);
         userRepository.save(user);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         Category category = Category.create("카테고리1", null);
@@ -141,7 +141,7 @@ class BoardTest {
         User user = User.create(userId);
         userRepository.save(user);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         Category category = Category.create("카테고리1", null);
@@ -194,7 +194,7 @@ class BoardTest {
         User user = User.create(userId);
         userRepository.save(user);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         Category category = Category.create("카테고리1", null);
@@ -245,7 +245,7 @@ class BoardTest {
         User user = User.create(userId);
         userRepository.save(user);
 
-        Board board = Board.create(user);
+        Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
 
         Category category = Category.create("카테고리1", null);
