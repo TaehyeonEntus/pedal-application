@@ -36,7 +36,7 @@ public class Pedal extends BaseEntity{
     //<-- 객체 생성 정적 메서드 -->
     public static Pedal create(String name, String description, Category category) {
         Pedal pedal = new Pedal(name, description, category);
-        pedal.changeImageUrl("/uploads/pedals/pedal.png");
+        pedal.changeImageUrl("pedal_default");
         return pedal;
     }
 

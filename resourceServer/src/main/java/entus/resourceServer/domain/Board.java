@@ -36,15 +36,17 @@ public class Board extends BaseEntity {
 
     private String imageUrl;
 
-    protected Board(User user) {
+    protected Board(User user, String name, String description) {
         this.user = user;
+        this.name = name;
+        this.description = description;
     }
 
     //<-- 객체 생성 정적 메서드 + 편의 메서드 -->
-    public static Board create(User user) {
-        Board board = new Board(user);
+    public static Board create(User user, String name, String description) {
+        Board board = new Board(user, name, description);
         user.getBoards().add(board);
-        board.changeImageUrl("/uploads/boards/board.jpg");
+        board.changeImageUrl("/board_default");
         return board;
     }
 
