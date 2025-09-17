@@ -46,7 +46,7 @@ public class Board extends BaseEntity {
     public static Board create(User user, String name, String description) {
         Board board = new Board(user, name, description);
         user.getBoards().add(board);
-        board.changeImageUrl("/board_default");
+        board.changeImageUrl("board_default");
         return board;
     }
 
