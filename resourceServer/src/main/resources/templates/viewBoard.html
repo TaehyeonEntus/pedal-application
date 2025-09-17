@@ -3,44 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <title>보드 상세</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .board-header { display: flex; align-items: center; margin-bottom: 20px; }
-        .board-header img { width: 200px; height: 200px; object-fit: cover; margin-right: 20px; }
-        .board-info { display: flex; flex-direction: column; }
-        .board-info h1 { margin: 0 0 10px 0; }
-        .pedal-list { display: flex; flex-wrap: wrap; gap: 15px; }
-        .pedal-item { width: 150px; text-align: center; }
-        .pedal-item img { width: 150px; height: 150px; object-fit: cover; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .container-main {
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .navbar {
+            background: rgba(255,255,255,0.1) !important;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand, .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: #f8f9fa !important;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading-spinner, .error-message, .empty-message {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .board-header-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .board-img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .pedal-list-section {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            align-items: center;
+            padding: 1rem 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .pedal-item-card {
+            flex: 0 0 auto;
+            width: 180px;
+            margin: 0 10px;
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .pedal-item-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .pedal-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .pedal-arrow {
+            font-size: 2rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin: 0 5px;
+        }
+
+        .btn-group-sm .btn {
+            font-size: 0.75rem;
+            padding: .25rem .5rem;
+        }
+
+        .pedal-info {
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
 
-<div class="board-header">
-    <img id="boardImage" src="/images/board_default.png" alt="Board Image">
-    <div class="board-info">
-        <h1 id="boardName">보드 이름</h1>
-        <p>작성자: <span id="boardOwner"></span></p>
-        <p id="boardDescription"></p>
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/home">
+            <i class="fas fa-music me-2"></i>Pedal App
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/home"><i class="fas fa-home me-1"></i>Home</a>
+            <a class="nav-link" href="/boards"><i class="fas fa-th-large me-1"></i>Pedal Boards</a>
+            <a class="nav-link" href="/pedals"><i class="fas fa-sliders-h me-1"></i>Effect Pedals</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container container-main">
+    <div class="board-header-section d-flex flex-column flex-md-row align-items-center">
+        <img id="boardImage" alt="Board Image" class="board-img mb-3 me-md-4">
+        <div class="text-center text-md-start">
+            <h1 id="boardName" class="display-5 fw-bold text-dark">보드 이름</h1>
+            <p class="lead text-muted">
+                <i class="fas fa-user me-2"></i>작성자: <span id="boardOwner"></span>
+            </p>
+            <p id="boardDescription" class="mt-3 text-dark"></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-sliders-h me-2"></i>🎚️ 페달 체인
+        </div>
+        <div class="card-body">
+            <div id="loading" class="loading-spinner">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">페달 목록을 불러오는 중...</p>
+            </div>
+            <div id="error" class="error-message" style="display: none;"></div>
+            <div id="pedalList" class="pedal-list-section" style="display: none;">
+            </div>
+            <div id="empty-message" class="empty-message" style="display: none;">
+                <i class="fas fa-exclamation-circle me-2"></i>이 보드에 등록된 페달이 없습니다.
+            </div>
+        </div>
     </div>
 </div>
 
-<hr>
+<footer>
+    <p>&copy; 2025 Pedal App. Made with ❤️</p>
+</footer>
 
-<div class="pedal-list" id="pedalList">
-    <!-- JS로 페달 아이템 추가 -->
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script type="module">
-    import { loadProtectedData } from "/js/apiRequest.js";
+    import { getData, postData } from "/js/api.js";
+    // getImageUrl 함수 임포트
+    import { getImageUrl } from "/js/getImageUrl.js";
+
+    // DOM 요소 참조
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const pedalListEl = document.getElementById('pedalList');
+    const boardNameEl = document.getElementById('boardName');
+    const boardOwnerEl = document.getElementById('boardOwner');
+    const boardDescriptionEl = document.getElementById('boardDescription');
+    const boardImageEl = document.getElementById('boardImage');
+    const emptyMessageEl = document.getElementById('empty-message');
 
     window.addEventListener('DOMContentLoaded', async () => {
         const boardId = getBoardIdFromPath();
-        const boardData = await fetchBoardData(boardId);
-        if (!boardData) return;
-
-        renderBoardInfo(boardData);
-        renderPedalList(boardId, boardData.pedals || []);
+        await loadBoardData(boardId);
     });
 
     // URL에서 boardId 추출
@@ -49,31 +218,24 @@
         return pathParts[pathParts.length - 1];
     }
 
-    // API 요청
-    async function fetchBoardData(boardId) {
+    async function loadBoardData(boardId) {
         try {
-            return await loadProtectedData(`/api/board/${boardId}`);
+            showLoading();
+            const data = await getData(`/api/board/${boardId}`);
+            renderBoardInfo(data);
+            renderPedalList(boardId, data.pedals || []);
+            showContent();
         } catch (err) {
-            console.error("보드 데이터를 불러오지 못했습니다.", err);
-            return null;
+            console.error("보드 데이터 로딩 실패:", err);
+            showError(err.message || '데이터를 불러오는데 실패했습니다.');
         }
     }
 
     // 페달 삭제
     async function deletePedal(boardId, pedalId) {
         try {
-            const response = await fetch(`/api/board/${boardId}/delete`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                credentials: "include", // 쿠키 기반 인증
-                body: JSON.stringify({ pedalId })
-            });
-
-            if (!response.ok) throw new Error("Delete failed");
-
-            return await response.json();
+            const updatedBoard = await postData(`/board/${boardId}/delete`, { pedalId });
+            return updatedBoard;
         } catch (err) {
             console.error("deletePedal fail", err);
             return null;
@@ -83,18 +245,8 @@
     // 페달 이동
     async function movePedal(boardId, pedalId, destination) {
         try {
-            const response = await fetch(`/api/board/${boardId}/move`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                credentials: "include", // 쿠키 기반 인증
-                body: JSON.stringify({ pedalId, destination })
-            });
-
-            if (!response.ok) throw new Error("Move failed");
-
-            return await response.json();
+            const updatedBoard = await postData(`/board/${boardId}/move`, { pedalId, destination });
+            return updatedBoard;
         } catch (err) {
             console.error("movePedal fail", err);
             return null;
@@ -104,60 +256,85 @@
     // 페달 스왑
     async function swapPedal(boardId, pedal1Id, pedal2Id) {
         try {
-            const response = await fetch(`/api/board/${boardId}/swap`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                credentials: "include", // 쿠키 기반 인증
-                body: JSON.stringify({ pedal1Id, pedal2Id })
-            });
-
-            if (!response.ok) throw new Error("Swap failed");
-
-            return await response.json();
+            const updatedBoard = await postData(`/board/${boardId}/swap`, { pedal1Id, pedal2Id });
+            return updatedBoard;
         } catch (err) {
             console.error("swapPedal fail", err);
             return null;
         }
     }
 
+    function showLoading() {
+        loadingEl.style.display = 'block';
+        errorEl.style.display = 'none';
+        pedalListEl.style.display = 'none';
+        emptyMessageEl.style.display = 'none';
+    }
+
+    function showContent() {
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'none';
+        pedalListEl.style.display = 'flex';
+    }
+
+    function showError(message) {
+        loadingEl.style.display = 'none';
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    }
 
     // 보드 정보 렌더링
     function renderBoardInfo(board) {
-        document.getElementById('boardName').textContent = board.boardName;
-        document.getElementById('boardOwner').textContent = board.boardOwner;
-        document.getElementById('boardDescription').textContent = board.boardDescription;
-        document.getElementById('boardImage').src = board.boardImageUrl || '/images/board_default.png';
+        boardNameEl.textContent = board.boardName;
+        boardOwnerEl.textContent = board.boardOwner;
+        boardDescriptionEl.textContent = board.boardDescription;
+        // R2 URL 변환 함수 적용
+        boardImageEl.src = getImageUrl(board.imageUrl);
+        // 기본 이미지 경로는 서버에서 처리하므로 onerror는 필요 없지만,
+        // 혹시 모를 상황에 대비해 남겨둘 수 있습니다.
     }
 
-    // renderPedalList 수정
+    // 페달 리스트 렌더링
     function renderPedalList(boardId, pedals) {
-        const pedalList = document.getElementById('pedalList');
-        pedalList.innerHTML = '';
+        pedalListEl.innerHTML = '';
+        if (pedals.length === 0) {
+            emptyMessageEl.style.display = 'block';
+            pedalListEl.style.display = 'none';
+            return;
+        }
+        emptyMessageEl.style.display = 'none';
+        pedalListEl.style.display = 'flex';
 
         pedals.forEach((pedal, index) => {
-            const div = document.createElement('div');
-            div.className = 'pedal-item';
-            div.innerHTML = `
-            <img src="${pedal.pedalImageUrl || '/images/pedal_default.png'}" alt="Pedal Image">
-            <p>${pedal.pedalName || '-'}</p>
-            <p>${pedal.categoryName || '-'}</p>
-            <button class="delete-btn">삭제</button>
-            <button class="move-btn">이동</button>
-            <button class="swap-btn">스왑</button>
-        `;
-            pedalList.appendChild(div);
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'pedal-item-card card shadow-sm';
+            cardDiv.innerHTML = `
+                <img src="${getImageUrl(pedal.pedalImageUrl)}" alt="Pedal Image" class="pedal-img">
+                <div class="pedal-info">
+                    <h6 class="card-title fw-bold">${pedal.pedalName || '-'}</h6>
+                    <span class="badge bg-primary mb-2">${pedal.categoryName || '-'}</span>
+                    <div class="btn-group btn-group-sm w-100" role="group">
+                        <button class="btn btn-outline-danger delete-btn"><i class="fas fa-trash me-1"></i>삭제</button>
+                        <button class="btn btn-outline-secondary move-btn"><i class="fas fa-arrows-alt me-1"></i>이동</button>
+                        <button class="btn btn-outline-info swap-btn"><i class="fas fa-exchange-alt me-1"></i>스왑</button>
+                    </div>
+                </div>
+            `;
+            pedalListEl.appendChild(cardDiv);
 
-            // 삭제 버튼
-            div.querySelector('.delete-btn').addEventListener('click', async () => {
+            if (index < pedals.length - 1) {
+                const arrowSpan = document.createElement('span');
+                arrowSpan.className = 'pedal-arrow';
+                arrowSpan.innerHTML = '<i class="fas fa-long-arrow-alt-right"></i>';
+                pedalListEl.appendChild(arrowSpan);
+            }
+
+            cardDiv.querySelector('.delete-btn').addEventListener('click', async () => {
                 if (!confirm(`"${pedal.pedalName}"를 삭제하시겠습니까?`)) return;
                 const updatedBoard = await deletePedal(boardId, pedal.pedalId);
                 if (updatedBoard) renderPedalList(boardId, updatedBoard.pedals);
             });
-
-            // 이동 버튼
-            div.querySelector('.move-btn').addEventListener('click', async () => {
+            cardDiv.querySelector('.move-btn').addEventListener('click', async () => {
                 const destination = parseInt(prompt('몇 번째 위치로 이동하시겠습니까? (0부터 시작)'), 10);
                 if (isNaN(destination) || destination < 0 || destination >= pedals.length) {
                     alert('잘못된 위치입니다.');
@@ -166,9 +343,7 @@
                 const updatedBoard = await movePedal(boardId, pedal.pedalId, destination);
                 if (updatedBoard) renderPedalList(boardId, updatedBoard.pedals);
             });
-
-            // 스왑 버튼
-            div.querySelector('.swap-btn').addEventListener('click', async () => {
+            cardDiv.querySelector('.swap-btn').addEventListener('click', async () => {
                 const otherIndex = parseInt(prompt('교체할 페달의 번호를 입력하세요 (0부터 시작)'), 10);
                 if (isNaN(otherIndex) || otherIndex < 0 || otherIndex >= pedals.length || otherIndex === index) {
                     alert('잘못된 번호입니다.');
@@ -178,19 +353,8 @@
                 const updatedBoard = await swapPedal(boardId, pedal.pedalId, otherPedal.pedalId);
                 if (updatedBoard) renderPedalList(boardId, updatedBoard.pedals);
             });
-
-            // 화살표
-            if (index < pedals.length - 1) {
-                const arrow = document.createElement('span');
-                arrow.textContent = '→';
-                arrow.style.alignSelf = 'center';
-                arrow.style.margin = '0 10px';
-                pedalList.appendChild(arrow);
-            }
         });
     }
-
 </script>
-
 </body>
 </html>
