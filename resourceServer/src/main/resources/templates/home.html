@@ -351,7 +351,7 @@
                 <td><strong>${p.pedalName}</strong></td>
                 <td><span class="badge bg-primary">${p.categoryName}</span></td>
                 <td>${p.pedalDescription || '<span class="text-muted">-</span>'}</td>
-                <td><small class="text-muted">${new Date(p.createdAt).toLocaleDateDateString()}</small></td>
+                <td><small class="text-muted">${new Date(p.createdAt).toLocaleDateString()}</small></td>
             `;
             pedalsTbody.appendChild(tr);
         });
