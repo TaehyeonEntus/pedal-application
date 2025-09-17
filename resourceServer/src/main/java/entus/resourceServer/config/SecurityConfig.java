@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,9 +31,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(EndpointRequest.to("prometheus")).permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/js/**", "/css/**", "/images/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/","/home","/board","/board/**").permitAll()
+                        .requestMatchers("/","/home","/board","/board/**","/pedal","/pedal/**").permitAll()
                         .requestMatchers("/addTestData").permitAll()
                         .requestMatchers("/public").permitAll()
                         .requestMatchers("/user").hasAnyRole("USER","ADMIN")
