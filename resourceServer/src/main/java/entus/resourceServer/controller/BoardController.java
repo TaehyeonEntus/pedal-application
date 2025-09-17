@@ -1,6 +1,7 @@
 package entus.resourceServer.controller;
 
 import entus.resourceServer.Service.BoardService;
+import entus.resourceServer.Service.R2Service;
 import entus.resourceServer.Service.UserService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.User;
@@ -14,29 +15,34 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.util.Map;
+
 @RequestMapping("/board")
 @RestController
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
     private final UserService userService;
+    private final R2Service r2Service;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addBoard(Authentication authentication, @RequestBody AddBoardRequestDto dto){
+    public ResponseEntity<?> addBoard(Authentication authentication, @RequestBody AddBoardRequestDto dto) {
         User user = userService.get(Long.parseLong((String) authentication.getPrincipal()));
-
-        Board board = Board.create(user);
-        board.changeName(dto.getName());
-        board.changeDescription(dto.getDescription());
-        board.changeImageUrl(dto.getImageUrl());
-
-        Long boardId = boardService.add(board);
+        Long boardId = boardService.add(Board.create(user, dto.getName(), dto.getDescription()));
 
         return ResponseEntity.ok().body(boardId);
     }
 
+    @PostMapping("/{boardId}/upload")
+    public ResponseEntity<?> uploadBoard(@PathVariable Long boardId) {
+        String objectKey = "board_" + boardId;
+        r2Service.setBoardImageUrl(boardId, objectKey);
+        return ResponseEntity.ok(Map.of("uploadUrl", r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5))));
+    }
+
     @PostMapping("/{boardId}/add/{pedalId}")
-    public BoardDetailDto addPedal(@PathVariable Long boardId, @PathVariable Long pedalId){
+    public BoardDetailDto addPedal(@PathVariable Long boardId, @PathVariable Long pedalId) {
         Board board = boardService.addPedal(boardId, pedalId);
         return new BoardDetailDto(board);
     }

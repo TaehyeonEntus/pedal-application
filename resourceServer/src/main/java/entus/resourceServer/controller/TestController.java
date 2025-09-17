@@ -32,7 +32,7 @@ public class TestController {
         Long p3 = pedalService.add(Pedal.create("pedal3", "설명3", categoryService.get(cate)));
         Long p4 = pedalService.add(Pedal.create("pedal4", "설명4", categoryService.get(cate)));
         Long p5 = pedalService.add(Pedal.create("pedal5", "설명5", categoryService.get(cate)));
-        Long boardId = boardService.add(Board.create(user));
+        Long boardId = boardService.add(Board.create(user,"board1","설명1"));
         boardService.get(boardId).addPedal(pedalService.get(p1));
         boardService.get(boardId).addPedal(pedalService.get(p2));
         boardService.get(boardId).addPedal(pedalService.get(p3));

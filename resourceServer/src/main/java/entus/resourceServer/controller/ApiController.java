@@ -4,6 +4,7 @@ import entus.resourceServer.Service.BoardService;
 import entus.resourceServer.Service.PedalService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
+import entus.resourceServer.domain.dto.page.BoardDetailPageDto;
 import entus.resourceServer.domain.dto.page.HomePageDto;
 import entus.resourceServer.domain.dto.response.BoardDetailDto;
 import entus.resourceServer.domain.dto.response.BoardListDto;
@@ -37,9 +38,7 @@ public class ApiController {
     }
 
     @GetMapping("/board/{boardId}")
-    public BoardDetailDto apiBoard(@PathVariable Long boardId) {
-        return new BoardDetailDto(boardService.get(boardId));
+    public BoardDetailPageDto apiBoard(@PathVariable Long boardId) {
+        return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)));
     }
-
-
 }
