@@ -26,7 +26,7 @@ public class PageController {
         return "viewBoards";
     }
 
-    @GetMapping("/board/{pedalId}")
+    @GetMapping("/pedal/{pedalId}")
     public String pedalDetail(@PathVariable String pedalId) {
         return "viewPedal";
     }
