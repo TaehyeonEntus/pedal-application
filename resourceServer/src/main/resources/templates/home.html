@@ -74,10 +74,18 @@
             vertical-align: middle;
         }
 
-        .table tbody tr:hover {
-            background-color: rgba(102, 126, 234, 0.1);
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr.clickable {
+            cursor: pointer;
+        }
+
+        .table tbody tr.clickable:hover {
+            background-color: rgba(102, 126, 234, 0.15);
             transform: scale(1.02);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
 
         .product-img {
@@ -137,16 +145,6 @@
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             margin-bottom: 1.5rem;
-        }
-
-        a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        a:hover {
-            color: #764ba2;
         }
     </style>
 </head>
@@ -321,13 +319,20 @@
 
         boards.forEach((b, i) => {
             const tr = document.createElement('tr');
+            tr.className = 'clickable';
             tr.innerHTML = `
                 <td><strong>${i + 1}</strong></td>
                 <td><img src="${getImageUrl(b.boardImageUrl)}" alt="board image" class="product-img"></td>
-                <td><a href="/board/${b.boardId}">${b.boardName}</a></td>
+                <td><strong>${b.boardName}</strong></td>
                 <td>${b.boardOwner || '<span class="text-muted">-</span>'}</td>
                 <td><small class="text-muted">${new Date(b.createdAt).toLocaleDateString()}</small></td>
             `;
+
+            // 행 전체 클릭 이벤트 추가
+            tr.addEventListener('click', () => {
+                window.location.href = `/board/${b.boardId}`;
+            });
+
             boardsTbody.appendChild(tr);
         });
     }
@@ -337,13 +342,14 @@
 
         if (pedals.length === 0) {
             const tr = document.createElement('tr');
-            tr.innerHTML = '<td colspan="6" class="empty-message"><i class="fas fa-guitar me-2"></i>등록된 페달이 없습니다.</td>';
+            tr.innerHTML = '<td colspan="5" class="empty-message"><i class="fas fa-guitar me-2"></i>등록된 페달이 없습니다.</td>';
             pedalsTbody.appendChild(tr);
             return;
         }
 
         pedals.forEach((p, i) => {
             const tr = document.createElement('tr');
+            tr.className = 'clickable';
             tr.innerHTML = `
                 <td><strong>${i + 1}</strong></td>
                 <td><img src="${getImageUrl(p.pedalImageUrl)}" alt="pedal image" class="product-img"></td>
@@ -351,6 +357,12 @@
                 <td><span class="badge bg-primary">${p.categoryName}</span></td>
                 <td><small class="text-muted">${new Date(p.createdAt).toLocaleDateString()}</small></td>
             `;
+
+            // 행 전체 클릭 이벤트 추가
+            tr.addEventListener('click', () => {
+                window.location.href = `/pedal/${p.pedalId}`;
+            });
+
             pedalsTbody.appendChild(tr);
         });
     }
