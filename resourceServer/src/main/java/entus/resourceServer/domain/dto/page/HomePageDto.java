@@ -11,8 +11,8 @@ public class HomePageDto {
     List<BoardListDto> boards;
     List<PedalListDto> pedals;
 
-    public HomePageDto(List<BoardListDto> boardListDtoList, List<PedalListDto> pedalListDtoList) {
-        this.boards = boardListDtoList;
-        this.pedals = pedalListDtoList;
+    public HomePageDto(List<BoardListDto> boardListDto, List<PedalListDto> pedalListDto) {
+        this.boards = boardListDto;
+        this.pedals = pedalListDto;
     }
 }

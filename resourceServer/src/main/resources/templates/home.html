@@ -184,7 +184,7 @@
                             <th>번호</th>
                             <th>이미지</th>
                             <th>이름</th>
-                            <th>설명</th>
+                            <th>작성자</th>
                             <th>등록일</th>
                         </tr>
                         </thead>
@@ -219,7 +219,6 @@
                             <th>이미지</th>
                             <th>이름</th>
                             <th>카테고리</th>
-                            <th>설명</th>
                             <th>등록일</th>
                         </tr>
                         </thead>
@@ -326,7 +325,7 @@
                 <td><strong>${i + 1}</strong></td>
                 <td><img src="${getImageUrl(b.boardImageUrl)}" alt="board image" class="product-img"></td>
                 <td><a href="/board/${b.boardId}">${b.boardName}</a></td>
-                <td>${b.boardDescription || '<span class="text-muted">-</span>'}</td>
+                <td>${b.boardOwner || '<span class="text-muted">-</span>'}</td>
                 <td><small class="text-muted">${new Date(b.createdAt).toLocaleDateString()}</small></td>
             `;
             boardsTbody.appendChild(tr);
@@ -350,7 +349,6 @@
                 <td><img src="${getImageUrl(p.pedalImageUrl)}" alt="pedal image" class="product-img"></td>
                 <td><strong>${p.pedalName}</strong></td>
                 <td><span class="badge bg-primary">${p.categoryName}</span></td>
-                <td>${p.pedalDescription || '<span class="text-muted">-</span>'}</td>
                 <td><small class="text-muted">${new Date(p.createdAt).toLocaleDateString()}</small></td>
             `;
             pedalsTbody.appendChild(tr);
