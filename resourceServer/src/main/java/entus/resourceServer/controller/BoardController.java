@@ -7,6 +7,7 @@ import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.User;
 import entus.resourceServer.domain.dto.request.*;
 import entus.resourceServer.domain.dto.response.AddBoardResponseDto;
+import entus.resourceServer.domain.dto.response.ApiResponse;
 import entus.resourceServer.domain.dto.response.BoardDetailDto;
 import entus.resourceServer.domain.dto.response.PresignedUrlResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +39,9 @@ public class BoardController {
     }
 
     @PostMapping("/{boardId}/upload/success")
-    public ResponseEntity<?> uploadImageSuccess(@PathVariable Long boardId, @RequestBody UploadImageSuccessRequestDto dto) {
+    public ApiResponse uploadImageSuccess(@PathVariable Long boardId, @RequestBody UploadImageSuccessRequestDto dto) {
         r2Service.setBoardImageUrl(boardId, dto.getObjectKey());
-        return ResponseEntity.ok().body("upload success");
+        return new ApiResponse("upload success");
     }
 
     @PostMapping("/{boardId}/add/{pedalId}")
