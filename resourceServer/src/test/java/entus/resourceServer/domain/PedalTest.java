@@ -1,5 +1,6 @@
 package entus.resourceServer.domain;
 
+import entus.resourceServer.repository.BrandRepository;
 import entus.resourceServer.repository.CategoryRepository;
 import entus.resourceServer.repository.PedalRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +18,9 @@ class PedalTest {
     PedalRepository pedalRepository;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    BrandRepository brandRepository;
+
     @BeforeEach
     void setUp() {
 
@@ -31,10 +35,12 @@ class PedalTest {
     void GetId() throws Exception {
         //given
         Category category = Category.create("카테고리1", null);
-        Pedal pedal = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1", null);
+        Pedal pedal = Pedal.create("페달1", "설명1", brand, category);
 
         //when
         categoryRepository.save(category);
+        brandRepository.save(brand);
         Long pedalId = pedalRepository.save(pedal).getId();
 
         //then
@@ -46,10 +52,12 @@ class PedalTest {
     void GetName() throws Exception {
         //given
         Category category = Category.create("카테고리1", null);
-        Pedal pedal = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1", null);
+        Pedal pedal = Pedal.create("페달1", "설명1", brand, category);
 
         //when
         categoryRepository.save(category);
+        brandRepository.save(brand);
         String pedalName = pedalRepository.save(pedal).getName();
 
         //then
@@ -61,10 +69,12 @@ class PedalTest {
     void GetDescription() throws Exception {
         //given
         Category category = Category.create("카테고리1", null);
-        Pedal pedal = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1", null);
+        Pedal pedal = Pedal.create("페달1", "설명1", brand, category);
 
         //when
         categoryRepository.save(category);
+        brandRepository.save(brand);
         String pedalDescription = pedalRepository.save(pedal).getDescription();
 
         //then
@@ -75,9 +85,11 @@ class PedalTest {
     @DisplayName("GetCategory")
     void GetCategory() throws Exception {
         Category category = Category.create("카테고리1", null);
-        Pedal pedal = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1", null);
+        Pedal pedal = Pedal.create("페달1", "설명1", brand, category);
 
         //when
+        brandRepository.save(brand);
         Category savedCategory = categoryRepository.save(category);
         Pedal savedPedal = pedalRepository.save(pedal);
 

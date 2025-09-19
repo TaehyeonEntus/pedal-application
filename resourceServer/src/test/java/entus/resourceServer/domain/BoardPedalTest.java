@@ -22,6 +22,8 @@ class BoardPedalTest {
     @Autowired
     BoardRepository boardRepository;
     @Autowired
+    BrandRepository brandRepository;
+    @Autowired
     PedalRepository pedalRepository;
 
     @BeforeEach
@@ -43,10 +45,13 @@ class BoardPedalTest {
         Category category = Category.create("카테고리1", null);
         categoryRepository.save(category);
 
-        Pedal pedal1 = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1","www.naver.com");
+        brandRepository.save(brand);
+
+        Pedal pedal1 = Pedal.create("페달1", "설명1", brand, category);
         pedalRepository.save(pedal1);
 
-        Pedal pedal2 = Pedal.create("페달2", "설명2", category);
+        Pedal pedal2 = Pedal.create("페달2", "설명2", brand, category);
         pedalRepository.save(pedal2);
 
         Board board = Board.create(user,"board1","설명1");
@@ -78,11 +83,15 @@ class BoardPedalTest {
         Category category = Category.create("카테고리1", null);
         categoryRepository.save(category);
 
-        Pedal pedal1 = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1","www.naver.com");
+        brandRepository.save(brand);
+
+        Pedal pedal1 = Pedal.create("페달1", "설명1", brand, category);
         pedalRepository.save(pedal1);
 
-        Pedal pedal2 = Pedal.create("페달2", "설명2", category);
+        Pedal pedal2 = Pedal.create("페달2", "설명2", brand, category);
         pedalRepository.save(pedal2);
+
 
         Board board = Board.create(user,"board1","설명1");
         boardRepository.save(board);
@@ -113,10 +122,13 @@ class BoardPedalTest {
         Category category = Category.create("카테고리1", null);
         categoryRepository.save(category);
 
-        Pedal pedal1 = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1","www.naver.com");
+        brandRepository.save(brand);
+
+        Pedal pedal1 = Pedal.create("페달1", "설명1", brand, category);
         pedalRepository.save(pedal1);
 
-        Pedal pedal2 = Pedal.create("페달2", "설명2", category);
+        Pedal pedal2 = Pedal.create("페달2", "설명2", brand, category);
         pedalRepository.save(pedal2);
 
         Board board = Board.create(user,"board1","설명1");
@@ -148,10 +160,13 @@ class BoardPedalTest {
         Category category = Category.create("카테고리1", null);
         categoryRepository.save(category);
 
-        Pedal pedal1 = Pedal.create("페달1", "설명1", category);
+        Brand brand = Brand.create("브랜드1","www.naver.com");
+        brandRepository.save(brand);
+
+        Pedal pedal1 = Pedal.create("페달1", "설명1", brand, category);
         pedalRepository.save(pedal1);
 
-        Pedal pedal2 = Pedal.create("페달2", "설명2", category);
+        Pedal pedal2 = Pedal.create("페달2", "설명2", brand, category);
         pedalRepository.save(pedal2);
 
         Board board = Board.create(user,"board1","설명1");
