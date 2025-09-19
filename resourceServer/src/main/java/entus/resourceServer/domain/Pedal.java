@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Pedal extends BaseEntity{
+public class Pedal extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -31,15 +31,16 @@ public class Pedal extends BaseEntity{
 
     private String imageUrl;
 
-    protected Pedal(String name, String description, Category category) {
+    protected Pedal(String name, String description, Brand brand, Category category) {
         this.name = name;
         this.description = description;
+        this.brand = brand;
         this.category = category;
     }
 
     //<-- 객체 생성 정적 메서드 -->
-    public static Pedal create(String name, String description, Category category) {
-        Pedal pedal = new Pedal(name, description, category);
+    public static Pedal create(String name, String description, Brand brand, Category category) {
+        Pedal pedal = new Pedal(name, description, brand, category);
         pedal.changeImageUrl("pedal_default");
         return pedal;
     }
