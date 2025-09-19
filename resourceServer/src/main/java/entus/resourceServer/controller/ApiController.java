@@ -22,8 +22,8 @@ public class ApiController {
     private final BoardService boardService;
     private final PedalService pedalService;
     @GetMapping("/check")
-    public ResponseEntity<?> check(){
-        return ResponseEntity.ok(new ApiResponse("success token valid"));
+    public ApiResponse check(){
+        return new ApiResponse("success token check");
     }
 
     @GetMapping("/home")

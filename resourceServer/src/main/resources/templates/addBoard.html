@@ -177,11 +177,6 @@
             loadingEl.style.display = "none";
             errorEl.textContent = "인증 정보가 유효하지 않습니다. 로그인 페이지로 이동합니다.";
             errorEl.style.display = "block";
-
-            // 3초 후 로그인 페이지로 리다이렉트
-            setTimeout(() => {
-                window.location.href = "/login"; // 실제 로그인 페이지 URL로 변경 필요
-            }, 3000);
         }
     });
 
