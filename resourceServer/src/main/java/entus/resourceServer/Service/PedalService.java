@@ -4,6 +4,8 @@ import entus.resourceServer.domain.Category;
 import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.repository.PedalRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,8 +24,8 @@ public class PedalService {
         return pedalRepository.save(pedal).getId();
     }
 
-    public List<Pedal> findAll() {
-        return pedalRepository.findAll();
+    public Page<Pedal> getAll(Pageable pageable) {
+        return pedalRepository.findAll(pageable);
     }
 
     public List<Pedal> findByCategory(Category category) {
@@ -32,7 +34,7 @@ public class PedalService {
         // 최하위 카테고리, 실제 페달인 경우
         if (category.getChildren().isEmpty())
             pedals.addAll(pedalRepository.findByCategory(category));
-        // 하위 카테고리가 있는 경우, 하위 탐색
+            // 하위 카테고리가 있는 경우, 하위 탐색
         else
             for (Category child : category.getChildren())
                 pedals.addAll(findByCategory(child));
@@ -40,7 +42,7 @@ public class PedalService {
         return pedals;
     }
 
-    public List<Pedal> get20(){
+    public List<Pedal> get20() {
         return pedalRepository.findTop20ByOrderByIdDesc();
     }
 }

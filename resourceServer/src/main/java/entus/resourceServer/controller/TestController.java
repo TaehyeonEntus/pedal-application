@@ -22,7 +22,7 @@ public class TestController {
     public String addTestData(Authentication authentication) {
         User user = userService.get(Long.parseLong((String) authentication.getPrincipal()));
         Long categoryId = categoryService.add(Category.create("카테고리1", null));
-        Long brandId = brandService.add(Brand.create("브랜드1", "www.naver.com"));
+        Long brandId = brandService.add(Brand.create("브랜드1", "https://www.naver.com"));
         Long p1 = pedalService.add(Pedal.create("pedal1", "설명1", brandService.get(brandId), categoryService.get(categoryId)));
         Long p2 = pedalService.add(Pedal.create("pedal2", "설명2", brandService.get(brandId), categoryService.get(categoryId)));
         Long p3 = pedalService.add(Pedal.create("pedal3", "설명3", brandService.get(brandId), categoryService.get(categoryId)));

@@ -4,14 +4,15 @@ import entus.resourceServer.Service.BoardService;
 import entus.resourceServer.Service.PedalService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
-import entus.resourceServer.domain.dto.page.BoardDetailPageDto;
-import entus.resourceServer.domain.dto.page.HomePageDto;
-import entus.resourceServer.domain.dto.page.PedalDetailPageDto;
+import entus.resourceServer.domain.dto.page.*;
 import entus.resourceServer.domain.dto.response.BoardDetailDto;
 import entus.resourceServer.domain.dto.response.BoardListDto;
 import entus.resourceServer.domain.dto.response.PedalDetailDto;
 import entus.resourceServer.domain.dto.response.PedalListDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,27 +26,51 @@ public class ApiController {
 
     @GetMapping("/home")
     public HomePageDto apiHome() {
-        List<Board> boardService20 = boardService.get20();
-        List<Pedal> pedalService20 = pedalService.get20();
+        List<Board> hotBoards = boardService.get20();
+        List<Pedal> hotPedals = pedalService.get20();
 
         return new HomePageDto(
-                boardService20
+                hotBoards
                         .stream()
                         .map(BoardListDto::new)
                         .toList(),
-                pedalService20
+                hotPedals
+                        .stream()
+                        .map(PedalListDto::new)
+                        .toList());
+    }
+
+    @GetMapping("/boards")
+    public BoardListPageDto apiBoardList(@RequestParam(defaultValue = "0") int page) {
+        Page<Board> boards = boardService.getAll(PageRequest.of(page, 20, Sort.by("id").ascending()));
+        return new BoardListPageDto(
+                boards.getTotalPages(),
+                boards.getNumber(),
+                boards
+                        .stream()
+                        .map(BoardListDto::new)
+                        .toList());
+    }
+
+    @GetMapping("/pedals")
+    public PedalListPageDto apiPedalList(@RequestParam(defaultValue = "0") int page) {
+        Page<Pedal> pedals = pedalService.getAll(PageRequest.of(page, 20, Sort.by("id").ascending()));
+        return new PedalListPageDto(
+                pedals.getTotalPages(),
+                pedals.getNumber(),
+                pedals
                         .stream()
                         .map(PedalListDto::new)
                         .toList());
     }
 
     @GetMapping("/board/{boardId}")
-    public BoardDetailPageDto apiBoard(@PathVariable Long boardId) {
+    public BoardDetailPageDto apiBoardDetail(@PathVariable Long boardId) {
         return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)));
     }
 
     @GetMapping("/pedal/{pedalId}")
-    public PedalDetailPageDto apiPedal(@PathVariable Long pedalId) {
+    public PedalDetailPageDto apiPedalDetail(@PathVariable Long pedalId) {
         return new PedalDetailPageDto(new PedalDetailDto(pedalService.get(pedalId)));
     }
 }

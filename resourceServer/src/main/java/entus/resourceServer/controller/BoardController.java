@@ -5,11 +5,10 @@ import entus.resourceServer.Service.R2Service;
 import entus.resourceServer.Service.UserService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.User;
-import entus.resourceServer.domain.dto.request.AddBoardRequestDto;
-import entus.resourceServer.domain.dto.request.DeletePedalRequestDto;
-import entus.resourceServer.domain.dto.request.MovePedalRequestDto;
-import entus.resourceServer.domain.dto.request.SwapPedalRequestDto;
+import entus.resourceServer.domain.dto.request.*;
+import entus.resourceServer.domain.dto.response.AddBoardResponseDto;
 import entus.resourceServer.domain.dto.response.BoardDetailDto;
+import entus.resourceServer.domain.dto.response.PresignedUrlResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,18 +26,22 @@ public class BoardController {
     private final R2Service r2Service;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addBoard(Authentication authentication, @RequestBody AddBoardRequestDto dto) {
+    public AddBoardResponseDto addBoard(Authentication authentication, @RequestBody AddBoardRequestDto dto) {
         User user = userService.get(Long.parseLong((String) authentication.getPrincipal()));
         Long boardId = boardService.add(Board.create(user, dto.getName(), dto.getDescription()));
-
-        return ResponseEntity.ok().body(boardId);
+        return new AddBoardResponseDto(boardId);
     }
 
     @PostMapping("/{boardId}/upload")
-    public ResponseEntity<?> uploadBoard(@PathVariable Long boardId) {
+    public PresignedUrlResponseDto uploadBoardImage(@PathVariable Long boardId) {
         String objectKey = "board_" + boardId;
-        r2Service.setBoardImageUrl(boardId, objectKey);
-        return ResponseEntity.ok(Map.of("uploadUrl", r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5))));
+        return new PresignedUrlResponseDto(r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5)));
+    }
+
+    @PostMapping("/{boardId}/upload/success")
+    public ResponseEntity<?> uploadImageSuccess(@PathVariable Long boardId, @RequestBody UploadImageSuccessRequestDto dto) {
+        r2Service.setBoardImageUrl(boardId, dto.getObjectKey());
+        return ResponseEntity.ok().body("upload success");
     }
 
     @PostMapping("/{boardId}/add/{pedalId}")

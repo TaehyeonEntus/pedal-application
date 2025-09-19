@@ -16,17 +16,17 @@ public class PageController {
         return "home";
     }
 
+    @GetMapping("/boards")
+    public String board() {
+        return "boardList";
+    }
+
     @GetMapping("/board/{boardId}")
     public String boardDetail(@PathVariable String boardId) {
         return "boardDetail";
     }
 
-    @GetMapping("/board")
-    public String board() {
-        return "boardList";
-    }
-
-    @GetMapping("/pedal")
+    @GetMapping("/pedals")
     public String pedal() {
         return "pedalList";
     }

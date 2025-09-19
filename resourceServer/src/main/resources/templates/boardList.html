@@ -1,10 +1,358 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Pedal Boards</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 기존 CSS와 동일 */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .container-main {
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .navbar {
+            background: rgba(255,255,255,0.1) !important;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand, .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: #f8f9fa !important;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        .table td {
+            border-color: #e9ecef;
+            vertical-align: middle;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr.clickable {
+            cursor: pointer;
+        }
+
+        .table tbody tr.clickable:hover {
+            background-color: rgba(102, 126, 234, 0.15);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .product-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .empty-message {
+            color: #6c757d;
+            text-align: center;
+            font-style: italic;
+        }
+
+        footer {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 3rem;
+        }
+
+        .section-title {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        /* 페이지네이션 버튼 스타일 */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .page-link {
+            border-radius: 50px !important;
+            margin: 0 5px;
+            color: #764ba2;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        .page-item.active .page-link {
+            z-index: 3;
+            color: #fff;
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        .page-link:hover {
+            color: #fff;
+            background-color: #667eea;
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
 
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/home">
+            <i class="fas fa-music me-2"></i>Pedal App
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/home"><i class="fas fa-home me-1"></i>Home</a>
+            <a class="nav-link" href="/boards"><i class="fas fa-th-large me-1"></i>Pedal Boards</a>
+            <a class="nav-link" href="/pedals"><i class="fas fa-sliders-h me-1"></i>Effect Pedals</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container container-main">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-th-large me-2"></i>🎛️ 페달보드 목록
+        </div>
+        <div class="card-body">
+            <div id="board-loading" class="loading-spinner">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">페달보드 목록을 불러오는 중...</p>
+            </div>
+            <div id="board-error" class="error-message" style="display: none;"></div>
+            <div id="board-table" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>이미지</th>
+                            <th>이름</th>
+                            <th>작성자</th>
+                            <th>등록일</th>
+                        </tr>
+                        </thead>
+                        <tbody id="boards"></tbody>
+                    </table>
+                </div>
+                <div class="pagination-container">
+                    <ul class="pagination" id="pagination-buttons"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Pedal App. Made with ❤️</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+    import { getData } from '/js/api.js';
+    import { getImageUrl } from '/js/getImageUrl.js';
+
+    // DOM 요소 참조
+    const boardLoading = document.getElementById('board-loading');
+    const boardError = document.getElementById('board-error');
+    const boardTable = document.getElementById('board-table');
+    const boardsTbody = document.getElementById('boards');
+    const paginationButtons = document.getElementById('pagination-buttons');
+
+    let currentPage = 0; // API가 0부터 시작하므로 0으로 설정
+    let totalPages = 0;
+    let isLoading = false;
+    const itemsPerPage = 20;
+
+    async function loadBoardData(page) {
+        if (isLoading) return;
+        isLoading = true;
+
+        showLoading();
+
+        try {
+            const data = await getData(`/api/boards?page=${page}`);
+
+            if (!data || !data.boards || data.boards.length === 0) {
+                showEmptyMessage();
+                return;
+            }
+
+            currentPage = data.currentPage;
+            totalPages = data.totalPage;
+
+            renderBoards(data.boards);
+            renderPagination();
+            showContent();
+
+        } catch (err) {
+            console.error('페달보드 목록 로딩 실패:', err);
+            showError(err.message || '데이터를 불러오는데 실패했습니다.');
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    function showLoading() {
+        boardLoading.style.display = 'block';
+        boardError.style.display = 'none';
+        boardTable.style.display = 'none';
+    }
+
+    function showContent() {
+        boardLoading.style.display = 'none';
+        boardError.style.display = 'none';
+        boardTable.style.display = 'block';
+    }
+
+    function showEmptyMessage() {
+        boardsTbody.innerHTML = '<td colspan="5" class="empty-message"><i class="fas fa-th-large me-2"></i>등록된 페달보드가 없습니다.</td>';
+        showContent();
+        paginationButtons.style.display = 'none';
+    }
+
+    function showError(errorMessage) {
+        boardLoading.style.display = 'none';
+        boardError.textContent = `보드 로딩 실패: ${errorMessage}`;
+        boardError.style.display = 'block';
+        boardTable.style.display = 'none';
+    }
+
+    function renderBoards(boards) {
+        boardsTbody.innerHTML = ''; // 기존 목록 초기화
+
+        boards.forEach((b, i) => {
+            const tr = document.createElement('tr');
+            tr.className = 'clickable';
+            tr.innerHTML = `
+                <td><strong>${(currentPage * itemsPerPage) + i + 1}</strong></td>
+                <td><img src="${getImageUrl(b.boardImageUrl)}" alt="board image" class="product-img"></td>
+                <td><strong>${b.boardName}</strong></td>
+                <td>${b.boardOwner || '<span class="text-muted">-</span>'}</td>
+                <td><small class="text-muted">${new Date(b.createdAt).toLocaleDateString()}</small></td>
+            `;
+            tr.addEventListener('click', () => {
+                window.location.href = `/board/${b.boardId}`;
+            });
+            boardsTbody.appendChild(tr);
+        });
+    }
+
+    function renderPagination() {
+        paginationButtons.innerHTML = '';
+        paginationButtons.style.display = 'flex';
+
+        const maxButtons = 5; // 화면에 표시할 최대 페이지 버튼 수
+        const startPage = Math.max(0, currentPage - Math.floor(maxButtons / 2));
+        const endPage = Math.min(totalPages - 1, startPage + maxButtons - 1);
+
+        // 이전 페이지 버튼
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 0 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 0) {
+                loadBoardData(currentPage - 1);
+            }
+        });
+        paginationButtons.appendChild(prevLi);
+
+        // 페이지 번호 버튼
+        for (let i = startPage; i <= endPage; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i + 1}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadBoardData(i);
+            });
+            paginationButtons.appendChild(li);
+        }
+
+        // 다음 페이지 버튼
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage >= totalPages - 1 ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < totalPages - 1) {
+                loadBoardData(currentPage + 1);
+            }
+        });
+        paginationButtons.appendChild(nextLi);
+    }
+
+    // 페이지 로드 시 첫 페이지 데이터 불러오기
+    window.addEventListener('DOMContentLoaded', () => loadBoardData(0));
+</script>
 </body>
 </html>

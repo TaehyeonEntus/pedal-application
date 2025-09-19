@@ -4,6 +4,8 @@ import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,10 @@ public class BoardService {
 
     public Board get(Long boardId) {
         return boardRepository.findById(boardId).orElse(null);
+    }
+
+    public Page<Board> getAll(Pageable pageable) {
+        return boardRepository.findAll(pageable);
     }
 
     public Long add(Board board) {

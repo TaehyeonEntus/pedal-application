@@ -6,5 +6,4 @@ import lombok.Data;
 public class AddBoardRequestDto {
     private String name;
     private String description;
-    private String imageUrl;
 }

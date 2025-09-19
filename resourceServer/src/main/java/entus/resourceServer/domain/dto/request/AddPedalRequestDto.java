@@ -10,5 +10,4 @@ public class AddPedalRequestDto {
     private String description;
     private Brand brand;
     private Category category;
-    private String imageUrl;
 }

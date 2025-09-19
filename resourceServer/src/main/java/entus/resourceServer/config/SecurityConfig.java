@@ -22,6 +22,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -34,10 +35,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/js/**", "/css/**", "/images/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/","/home","/board","/board/**","/pedal","/pedal/**").permitAll()
+                        .requestMatchers("/", "/home", "/board", "/boards", "/board/**", "/pedal", "/pedals", "/pedal/**").permitAll()
                         .requestMatchers("/addTestData").permitAll()
                         .requestMatchers("/public").permitAll()
-                        .requestMatchers("/user").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/user").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin").hasRole("ADMIN")
 
                         .anyRequest().authenticated())
