@@ -22,6 +22,10 @@ public class Pedal extends BaseEntity{
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -47,6 +51,10 @@ public class Pedal extends BaseEntity{
 
     public void changeDescription(String newDescription) {
         this.description = newDescription;
+    }
+
+    public void changeBrand(Brand newBrand) {
+        this.brand = newBrand;
     }
 
     public void changeCategory(Category newCategory) {
