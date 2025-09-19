@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,10 @@ import java.util.List;
 public class ApiController {
     private final BoardService boardService;
     private final PedalService pedalService;
+    @GetMapping("/check")
+    public ResponseEntity<?> check(){
+        return ResponseEntity.ok().body("success token valid");
+    }
 
     @GetMapping("/home")
     public HomePageDto apiHome() {

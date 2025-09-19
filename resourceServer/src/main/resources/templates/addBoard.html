@@ -146,14 +146,51 @@
 <script type="module">
     import { getData, postData } from "/js/api.js";
 
+    // DOM 요소 참조
     const form = document.getElementById("addBoardForm");
     const loadingEl = document.getElementById("loading");
     const errorEl = document.getElementById("error");
+    const mainContainer = document.querySelector(".container-main"); // 전체 컨테이너를 숨길 때 사용
 
+    // 페이지 로딩 시 토큰 유효성 검사
+    window.addEventListener("DOMContentLoaded", async () => {
+        // 처음에는 메인 컨텐츠를 숨겨둠
+        mainContainer.style.display = "none";
+        loadingEl.style.display = "block";
+        loadingEl.querySelector("p").textContent = "인증 정보를 확인 중입니다...";
+
+        try {
+            // 서버의 토큰 유효성 검사 API 호출
+            const response = await getData("/api/check");
+
+            // 응답 상태가 200 OK가 아니거나, 응답 내용이 예상과 다르면 실패로 간주
+            if (response.status !== 200) {
+                throw new Error("인증 실패");
+            }
+
+            // 성공 시, 폼을 보이게 하고 로딩 스피너 숨기기
+            mainContainer.style.display = "flex";
+            loadingEl.style.display = "none";
+
+        } catch (err) {
+            console.error("인증 실패:", err);
+            loadingEl.style.display = "none";
+            errorEl.textContent = "인증 정보가 유효하지 않습니다. 로그인 페이지로 이동합니다.";
+            errorEl.style.display = "block";
+
+            // 3초 후 로그인 페이지로 리다이렉트
+            setTimeout(() => {
+                window.location.href = "/login"; // 실제 로그인 페이지 URL로 변경 필요
+            }, 3000);
+        }
+    });
+
+    // 기존 폼 제출 이벤트 리스너 (변동 없음)
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         errorEl.style.display = "none";
         loadingEl.style.display = "block";
+        loadingEl.querySelector("p").textContent = "보드를 생성 중...";
 
         const name = document.getElementById("name").value;
         const description = document.getElementById("description").value;
@@ -161,7 +198,7 @@
 
         try {
             // 1. 보드 생성
-            const { boardId } = await postData("/board/add", { name, description });
+            const { boardId } = await postData("/api/board/add", { name, description });
 
             // 2. 이미지가 없으면 바로 상세로 이동
             if (!imageFile) {
@@ -170,7 +207,7 @@
             }
 
             // 3. presigned URL 요청
-            const { uploadUrl } = await postData(`/board/${boardId}/upload`);
+            const { uploadUrl } = await postData(`/api/board/${boardId}/upload`);
 
             // 4. 브라우저에서 직접 업로드
             await fetch(uploadUrl, {
@@ -180,7 +217,7 @@
             });
 
             // 5. 업로드 성공 알림
-            await postData(`/board/${boardId}/upload/success`, { objectKey: `board_${boardId}` });
+            await postData(`/api/board/${boardId}/upload/success`, { objectKey: `board_${boardId}` });
 
             // 6. 상세 페이지로 이동
             window.location.href = `/board/${boardId}`;

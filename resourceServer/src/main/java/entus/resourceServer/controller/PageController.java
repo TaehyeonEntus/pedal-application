@@ -26,6 +26,11 @@ public class PageController {
         return "boardDetail";
     }
 
+    @GetMapping("/board/add")
+    public String addBoard() {
+        return "addBoard";
+    }
+
     @GetMapping("/pedals")
     public String pedal() {
         return "pedalList";
@@ -34,5 +39,10 @@ public class PageController {
     @GetMapping("/pedal/{pedalId}")
     public String pedalDetail(@PathVariable String pedalId) {
         return "pedalDetail";
+    }
+
+    @GetMapping("/pedal/add")
+    public String addPedal() {
+        return "addPedal";
     }
 }
