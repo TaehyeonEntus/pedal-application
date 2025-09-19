@@ -201,9 +201,9 @@
             <div class="text-center text-md-start w-100">
                 <h1 class="display-6 fw-bold mb-0">${pedal.pedalName || '이름 없음'}</h1>
                 <div class="mt-2">
-                    <span class="badge bg-success me-2">${pedal.pedalCategory?.name || "카테고리 없음"}</span>
-                    <a href="${pedal.pedalBrand?.homepage || '#'}" target="_blank" class="text-decoration-none" id="brandLink">
-                        <span class="badge bg-secondary">${pedal.pedalBrand?.name || "브랜드 없음"}</span>
+                    <span class="badge bg-success me-2">${pedal.pedalCategoryName || "카테고리 없음"}</span>
+                    <a href="${pedal.pedalBrandHomepage || '#'}" target="_blank" class="text-decoration-none" id="brandLink">
+                        <span class="badge bg-secondary">${pedal.pedalBrandName || "브랜드 없음"}</span>
                     </a>
                 </div>
                 <p class="description-text mt-4">${pedal.pedalDescription || "설명이 없습니다."}</p>
@@ -212,7 +212,7 @@
         pedalContentEl.innerHTML = pedalContentHtml;
 
         const brandLinkEl = pedalContentEl.querySelector('#brandLink');
-        if (!pedal.pedalBrand?.homepage) {
+        if (!pedal.pedalBrandHomepage) {
             brandLinkEl.style.pointerEvents = 'none';
             brandLinkEl.style.cursor = 'default';
         }

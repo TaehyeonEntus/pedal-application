@@ -26,13 +26,13 @@ public class PageController {
         return "boardList";
     }
 
-    @GetMapping("/pedal/{pedalId}")
-    public String pedalDetail(@PathVariable String pedalId) {
-        return "pedalDetail";
-    }
-
     @GetMapping("/pedal")
     public String pedal() {
         return "pedalList";
+    }
+
+    @GetMapping("/pedal/{pedalId}")
+    public String pedalDetail(@PathVariable String pedalId) {
+        return "pedalDetail";
     }
 }
