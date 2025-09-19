@@ -20,7 +20,7 @@ public class PedalController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addPedal(@RequestBody AddPedalRequestDto dto) {
-        Long pedalId = pedalService.add(Pedal.create(dto.getName(), dto.getDescription(), dto.getCategory()));
+        Long pedalId = pedalService.add(Pedal.create(dto.getName(), dto.getDescription(), dto.getBrand(), dto.getCategory()));
 
         return ResponseEntity.ok().body(pedalId);
     }
