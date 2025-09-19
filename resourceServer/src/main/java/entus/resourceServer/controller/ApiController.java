@@ -6,8 +6,10 @@ import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.domain.dto.page.BoardDetailPageDto;
 import entus.resourceServer.domain.dto.page.HomePageDto;
+import entus.resourceServer.domain.dto.page.PedalDetailPageDto;
 import entus.resourceServer.domain.dto.response.BoardDetailDto;
 import entus.resourceServer.domain.dto.response.BoardListDto;
+import entus.resourceServer.domain.dto.response.PedalDetailDto;
 import entus.resourceServer.domain.dto.response.PedalListDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -40,5 +42,10 @@ public class ApiController {
     @GetMapping("/board/{boardId}")
     public BoardDetailPageDto apiBoard(@PathVariable Long boardId) {
         return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)));
+    }
+
+    @GetMapping("/pedal/{pedalId}")
+    public PedalDetailPageDto apiPedal(@PathVariable Long pedalId) {
+        return new PedalDetailPageDto(new PedalDetailDto(pedalService.get(pedalId)));
     }
 }

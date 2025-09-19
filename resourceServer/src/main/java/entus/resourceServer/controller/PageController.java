@@ -18,21 +18,21 @@ public class PageController {
 
     @GetMapping("/board/{boardId}")
     public String boardDetail(@PathVariable String boardId) {
-        return "viewBoard";
+        return "boardDetail";
     }
 
     @GetMapping("/board")
     public String board() {
-        return "viewBoards";
+        return "boardList";
     }
 
     @GetMapping("/pedal/{pedalId}")
     public String pedalDetail(@PathVariable String pedalId) {
-        return "viewPedal";
+        return "pedalDetail";
     }
 
     @GetMapping("/pedal")
     public String pedal() {
-        return "viewPedals";
+        return "pedalList";
     }
 }
