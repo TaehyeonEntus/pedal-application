@@ -144,7 +144,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script type="module">
-    import { getData, postData } from "/js/api.js";
+    import {getData, postData} from "/js/api.js";
 
     const check = await getData("/api/check");
     // DOM 요소 참조
@@ -165,7 +165,7 @@
 
         try {
             // 1. 보드 생성
-            const { boardId } = await postData("/board/add", { name, description });
+            const {boardId} = await postData("/board/add", {name, description});
 
             // 2. 이미지가 없으면 바로 상세로 이동
             if (!imageFile) {
@@ -174,17 +174,17 @@
             }
 
             // 3. presigned URL 요청
-            const { uploadUrl } = await postData(`/board/${boardId}/upload`);
+            const {uploadUrl, objectKey} = await postData(`/board/${boardId}/upload`);
 
             // 4. 브라우저에서 직접 업로드
             await fetch(uploadUrl, {
                 method: "PUT",
                 body: imageFile,
-                headers: { "Content-Type": imageFile.type }
+                headers: {"Content-Type": imageFile.type}
             });
 
             // 5. 업로드 성공 알림
-            await postData(`/board/${boardId}/upload/success`, { objectKey: `board_${boardId}` });
+            await postData(`/board/${boardId}/upload/success`, {objectKey: objectKey});
 
             // 6. 상세 페이지로 이동
             window.location.href = `/board/${boardId}`;

@@ -35,7 +35,7 @@ public class BoardController {
     @PostMapping("/{boardId}/upload")
     public PresignedUrlResponseDto uploadBoardImage(@PathVariable Long boardId) {
         String objectKey = "board_" + boardId + ".jpg";
-        return new PresignedUrlResponseDto(r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5)));
+        return new PresignedUrlResponseDto(r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5)), objectKey);
     }
 
     @PostMapping("/{boardId}/upload/success")

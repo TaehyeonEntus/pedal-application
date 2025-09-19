@@ -32,7 +32,7 @@ public class PedalController {
     @PostMapping("/{pedalId}/upload")
     public PresignedUrlResponseDto uploadPedal(@PathVariable Long pedalId) {
         String objectKey = "pedal_" + pedalId + ".jpg";
-        return new PresignedUrlResponseDto(r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5)));
+        return new PresignedUrlResponseDto(r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5)),objectKey);
     }
 
     @PostMapping("/{pedalId}/upload/success")
