@@ -5,10 +5,7 @@ import entus.resourceServer.Service.PedalService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.domain.dto.page.*;
-import entus.resourceServer.domain.dto.response.BoardDetailDto;
-import entus.resourceServer.domain.dto.response.BoardListDto;
-import entus.resourceServer.domain.dto.response.PedalDetailDto;
-import entus.resourceServer.domain.dto.response.PedalListDto;
+import entus.resourceServer.domain.dto.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +23,7 @@ public class ApiController {
     private final PedalService pedalService;
     @GetMapping("/check")
     public ResponseEntity<?> check(){
-        return ResponseEntity.ok().body("success token valid");
+        return ResponseEntity.ok(new ApiResponse("success token valid"));
     }
 
     @GetMapping("/home")
