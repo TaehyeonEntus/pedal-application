@@ -165,7 +165,7 @@
 
         try {
             // 1. 보드 생성
-            const { boardId } = await postData("/api/board/add", { name, description });
+            const { boardId } = await postData("/board/add", { name, description });
 
             // 2. 이미지가 없으면 바로 상세로 이동
             if (!imageFile) {
@@ -174,7 +174,7 @@
             }
 
             // 3. presigned URL 요청
-            const { uploadUrl } = await postData(`/api/board/${boardId}/upload`);
+            const { uploadUrl } = await postData(`/board/${boardId}/upload`);
 
             // 4. 브라우저에서 직접 업로드
             await fetch(uploadUrl, {
@@ -184,7 +184,7 @@
             });
 
             // 5. 업로드 성공 알림
-            await postData(`/api/board/${boardId}/upload/success`, { objectKey: `board_${boardId}` });
+            await postData(`/board/${boardId}/upload/success`, { objectKey: `board_${boardId}` });
 
             // 6. 상세 페이지로 이동
             window.location.href = `/board/${boardId}`;
