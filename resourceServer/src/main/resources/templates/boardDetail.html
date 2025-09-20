@@ -127,7 +127,23 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
             position: relative;
-            cursor: pointer;
+            cursor: pointer; /* Default cursor for view mode */
+            user-select: none;
+        }
+
+        /* Drag-and-drop styles for owner edit mode */
+        .pedal-item-card.editable {
+            cursor: grab;
+        }
+
+        .pedal-item-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.9);
+        }
+
+        .pedal-item-card.drag-over {
+            border: 2px solid #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
         }
 
         .pedal-item-card:hover {
@@ -190,6 +206,66 @@
             margin-left: 20px;
         }
 
+        .pedal-drag-over-line {
+            background-color: #fff;
+            width: 5px;
+            height: 80px;
+            flex-shrink: 0;
+            margin: 0 -2px;
+            border-radius: 3px;
+        }
+
+        .trash-can-container {
+            display: none; /* Initial hide */
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            transform: scale(0.9);
+            opacity: 0.8;
+            z-index: 100;
+        }
+
+        .trash-can-container.active {
+            display: block;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .trash-can-icon {
+            font-size: 2.5rem;
+            color: #dc3545;
+        }
+
+        .trash-can-container.drag-over .trash-can-icon {
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .edit-pedal-btn {
+            background: #28a745;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+            display: none; /* Initially hidden */
+        }
+        .edit-pedal-btn:hover {
+            background: #218838;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
         footer {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
@@ -235,8 +311,9 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <i class="fas fa-sliders-h me-2"></i>🎚️ 페달 체인
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-sliders-h me-2"></i>🎚️ 페달 체인</span>
+            <button id="editPedalChainBtn" class="edit-pedal-btn"><i class="fas fa-edit me-1"></i>페달 순서 변경</button>
         </div>
         <div class="card-body">
             <div id="loading" class="loading-spinner">
@@ -249,6 +326,9 @@
             <div id="empty-message" class="empty-message" style="display: none;">
                 <i class="fas fa-exclamation-circle me-2"></i>이 보드에 등록된 페달이 없습니다.
             </div>
+        </div>
+        <div id="trashCan" class="trash-can-container">
+            <i class="fas fa-trash-alt trash-can-icon"></i>
         </div>
     </div>
 </div>
@@ -267,6 +347,8 @@
     const errorEl = document.getElementById('error');
     const pedalListEl = document.getElementById('pedalList');
     const emptyMessageEl = document.getElementById('empty-message');
+    const trashCanEl = document.getElementById('trashCan');
+    const editPedalChainBtn = document.getElementById('editPedalChainBtn');
 
     // 보드 상세 정보 관련 DOM 요소
     const boardLoadingEl = document.getElementById('boardLoading');
@@ -274,6 +356,8 @@
     const boardEditContainerEl = document.getElementById('boardEditContainer');
 
     let currentBoardData = null; // 현재 보드 데이터를 저장할 변수
+    let draggedPedalCard = null;
+    let isPedalChainEditMode = false;
 
     window.addEventListener('DOMContentLoaded', async () => {
         const boardId = getBoardIdFromPath();
@@ -291,14 +375,17 @@
             showLoading();
             const data = await getData(`/api/board/${boardId}`);
             currentBoardData = data.boardDetail;
+
             renderBoardInfo(data);
             renderPedalList(data.boardDetail.pedals || [], data.owner);
 
             if (data.owner) {
                 boardEditContainerEl.style.display = 'block';
+                editPedalChainBtn.style.display = 'inline-block';
                 attachBoardEditListeners(boardId);
             } else {
                 boardEditContainerEl.style.display = 'none';
+                editPedalChainBtn.style.display = 'none';
             }
 
             showContent();
@@ -487,7 +574,7 @@
         }
     }
 
-    // 페달 리스트 렌더링 (클릭 기능 추가)
+    // 페달 리스트 렌더링 (클릭 및 드래그 드롭 기능)
     function renderPedalList(pedals, owner) {
         pedalListEl.innerHTML = '';
         const boardId = getBoardIdFromPath();
@@ -504,6 +591,9 @@
         pedals.forEach((pedal, index) => {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'pedal-item-card card shadow-sm';
+            cardDiv.dataset.pedalId = pedal.pedalId;
+            cardDiv.draggable = owner; // Only draggable for owner
+
             cardDiv.innerHTML = `
                 <div class="clickable-hint">
                     <i class="fas fa-eye"></i>
@@ -515,8 +605,11 @@
                 </div>
             `;
 
-            cardDiv.addEventListener('click', () => {
-                window.location.href = `/pedal/${pedal.pedalId}`;
+            // Add click listener for all users
+            cardDiv.addEventListener('click', (e) => {
+                if (!isPedalChainEditMode) {
+                    window.location.href = `/pedal/${pedal.pedalId}`;
+                }
             });
 
             pedalListEl.appendChild(cardDiv);
@@ -545,6 +638,183 @@
             pedalListEl.appendChild(addButtonWrapper);
         }
     }
+
+    function attachDragDropListeners(boardId) {
+        let draggedPedalCard = null;
+
+        // 드래그 시작
+        pedalListEl.addEventListener('dragstart', (e) => {
+            if (isPedalChainEditMode && e.target.classList.contains('pedal-item-card')) {
+                draggedPedalCard = e.target;
+                e.dataTransfer.setData('text/plain', draggedPedalCard.dataset.pedalId);
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => draggedPedalCard.classList.add('dragging'), 0);
+                trashCanEl.classList.add('active');
+            }
+        });
+
+        // 드래그 중인 요소가 다른 요소 위에 있을 때
+        pedalListEl.addEventListener('dragover', (e) => {
+            if (!isPedalChainEditMode || !draggedPedalCard) return;
+            e.preventDefault();
+
+            const target = e.target.closest('.pedal-item-card, .pedal-list-section');
+            if (target && target !== draggedPedalCard) {
+                e.dataTransfer.dropEffect = 'move';
+
+                const afterElement = getDragAfterElement(pedalListEl, e.clientX);
+                const existingLine = pedalListEl.querySelector('.pedal-drag-over-line');
+
+                if (existingLine) {
+                    existingLine.remove();
+                }
+
+                if (afterElement) {
+                    const line = document.createElement('div');
+                    line.className = 'pedal-drag-over-line';
+                    pedalListEl.insertBefore(line, afterElement);
+                } else if (pedalListEl.children.length > 0) {
+                    const lastChild = pedalListEl.lastElementChild;
+                    if(lastChild && lastChild.classList.contains('pedal-item-card')) {
+                        const line = document.createElement('div');
+                        line.className = 'pedal-drag-over-line';
+                        pedalListEl.appendChild(line);
+                    }
+                }
+            }
+        });
+
+        // 드롭 가능한 요소 위로 들어왔을 때
+        pedalListEl.addEventListener('dragenter', (e) => {
+            if (!isPedalChainEditMode || !draggedPedalCard) return;
+            const target = e.target.closest('.pedal-item-card');
+            if (target && target !== draggedPedalCard) {
+                target.classList.add('drag-over');
+            }
+        });
+
+        // 드롭 가능한 요소에서 나갔을 때
+        pedalListEl.addEventListener('dragleave', (e) => {
+            if (!isPedalChainEditMode) return;
+            e.target.classList.remove('drag-over');
+        });
+
+        // 드롭
+        pedalListEl.addEventListener('drop', async (e) => {
+            if (!isPedalChainEditMode || !draggedPedalCard) return;
+            e.preventDefault();
+
+            const fromPedalId = draggedPedalCard.dataset.pedalId;
+            const toElement = e.target.closest('.pedal-item-card');
+
+            pedalListEl.querySelector('.pedal-drag-over-line')?.remove();
+
+            // Swap 로직
+            if (toElement && toElement !== draggedPedalCard) {
+                const toPedalId = toElement.dataset.pedalId;
+                try {
+                    await postData(`/board/${boardId}/swap`, { pedal1Id: parseInt(fromPedalId), pedal2Id: parseInt(toPedalId) });
+                    alert('페달이 성공적으로 교체되었습니다.');
+                } catch (err) {
+                    console.error("페달 스왑 실패:", err);
+                    alert('교체에 실패했습니다.');
+                }
+            }
+            // Move 로직
+            else {
+                const afterElement = getDragAfterElement(pedalListEl, e.clientX);
+                const newIndex = Array.from(pedalListEl.children).indexOf(afterElement);
+
+                try {
+                    await postData(`/board/${boardId}/move`, { pedalId: parseInt(fromPedalId), destination: newIndex });
+                    alert('페달이 성공적으로 이동되었습니다.');
+                } catch (err) {
+                    console.error("페달 이동 실패:", err);
+                    alert('이동에 실패했습니다.');
+                }
+            }
+            await loadBoardData(boardId); // 데이터 새로고침
+        });
+
+        // 드래그 종료
+        pedalListEl.addEventListener('dragend', (e) => {
+            draggedPedalCard.classList.remove('dragging');
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            pedalListEl.querySelector('.pedal-drag-over-line')?.remove();
+            trashCanEl.classList.remove('active');
+        });
+
+        // 휴지통 드롭 이벤트
+        trashCanEl.addEventListener('dragover', (e) => {
+            if (!isPedalChainEditMode) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            trashCanEl.classList.add('drag-over');
+        });
+
+        trashCanEl.addEventListener('dragleave', () => {
+            if (!isPedalChainEditMode) return;
+            trashCanEl.classList.remove('drag-over');
+        });
+
+        trashCanEl.addEventListener('drop', async (e) => {
+            if (!isPedalChainEditMode) return;
+            e.preventDefault();
+            const pedalId = e.dataTransfer.getData('text/plain');
+            trashCanEl.classList.remove('drag-over');
+
+            if (confirm('정말 이 페달을 삭제하시겠습니까?')) {
+                try {
+                    await postData(`/board/${boardId}/delete`, { pedalId: parseInt(pedalId) });
+                    alert('페달이 성공적으로 삭제되었습니다.');
+                    await loadBoardData(boardId);
+                } catch (err) {
+                    console.error("페달 삭제 실패:", err);
+                    alert('삭제에 실패했습니다.');
+                }
+            }
+        });
+    }
+
+    // 드롭 위치 계산
+    function getDragAfterElement(container, x) {
+        const draggableElements = [...container.querySelectorAll('.pedal-item-card:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = x - box.left - box.width / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // Edit Pedal Chain button logic
+    editPedalChainBtn.addEventListener('click', async () => {
+        const boardId = getBoardIdFromPath();
+        isPedalChainEditMode = !isPedalChainEditMode;
+
+        if (isPedalChainEditMode) {
+            editPedalChainBtn.textContent = '편집 모드 종료';
+            editPedalChainBtn.classList.remove('edit-pedal-btn');
+            editPedalChainBtn.classList.add('btn-secondary');
+            trashCanEl.style.display = 'block';
+
+            // Re-render to enable drag behavior and remove arrows
+            await loadBoardData(boardId);
+        } else {
+            editPedalChainBtn.textContent = '페달 순서 변경';
+            editPedalChainBtn.classList.remove('btn-secondary');
+            editPedalChainBtn.classList.add('edit-pedal-btn');
+            trashCanEl.style.display = 'none';
+
+            // Re-render to disable drag and show arrows
+            await loadBoardData(boardId);
+        }
+    });
+
 </script>
 </body>
 </html>

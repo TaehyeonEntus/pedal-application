@@ -53,20 +53,17 @@ public class BoardController {
     }
 
     @PostMapping("/{boardId}/delete")
-    public BoardDetailDto deletePedal(@PathVariable Long boardId, @RequestBody DeletePedalRequestDto dto) {
-        Board board = boardService.removePedal(boardId, dto.getPedalId());
-        return new BoardDetailDto(board);
+    public DeletePedalResponseDto deletePedal(@PathVariable Long boardId, @RequestBody DeletePedalRequestDto dto) {
+        return new DeletePedalResponseDto(boardService.removePedal(boardId, dto.getPedalId()));
     }
 
     @PostMapping("/{boardId}/move")
-    public BoardDetailDto movePedal(@PathVariable Long boardId, @RequestBody MovePedalRequestDto dto) {
-        Board board = boardService.movePedal(boardId, dto.getPedalId(), dto.getDestination());
-        return new BoardDetailDto(board);
+    public MovePedalResponseDto movePedal(@PathVariable Long boardId, @RequestBody MovePedalRequestDto dto) {
+        return new MovePedalResponseDto(boardService.movePedal(boardId, dto.getPedalId(), dto.getDestination()));
     }
 
     @PostMapping("/{boardId}/swap")
-    public BoardDetailDto swapPedal(@PathVariable Long boardId, @RequestBody SwapPedalRequestDto dto) {
-        Board board = boardService.swapPedal(boardId, dto.getPedal1Id(), dto.getPedal2Id());
-        return new BoardDetailDto(board);
+    public SwapPedalResponseDto swapPedal(@PathVariable Long boardId, @RequestBody SwapPedalRequestDto dto) {
+        return new SwapPedalResponseDto(boardService.swapPedal(boardId, dto.getPedal1Id(), dto.getPedal2Id()));
     }
 }
