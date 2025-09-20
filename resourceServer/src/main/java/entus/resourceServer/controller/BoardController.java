@@ -6,12 +6,8 @@ import entus.resourceServer.Service.UserService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.User;
 import entus.resourceServer.domain.dto.request.*;
-import entus.resourceServer.domain.dto.response.AddBoardResponseDto;
-import entus.resourceServer.domain.dto.response.ApiResponse;
-import entus.resourceServer.domain.dto.response.BoardDetailDto;
-import entus.resourceServer.domain.dto.response.PresignedUrlResponseDto;
+import entus.resourceServer.domain.dto.response.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +26,12 @@ public class BoardController {
         User user = userService.get(Long.parseLong((String) authentication.getPrincipal()));
         Long boardId = boardService.add(Board.create(user, dto.getName(), dto.getDescription()));
         return new AddBoardResponseDto(boardId);
+    }
+
+    @PostMapping("/{boardId}/update")
+    public UpdateBoardResponseDto updateBoard(@PathVariable Long boardId, @RequestBody UpdateBoardRequestDto dto){
+        Board board = boardService.update(boardId, dto.getName(), dto.getDescription());
+        return new UpdateBoardResponseDto(board.getName(), board.getDescription(), board.getImageUrl());
     }
 
     @PostMapping("/{boardId}/upload")

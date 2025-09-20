@@ -2,15 +2,17 @@ package entus.resourceServer.controller;
 
 import entus.resourceServer.Service.BoardService;
 import entus.resourceServer.Service.PedalService;
+import entus.resourceServer.Service.UserService;
 import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
+import entus.resourceServer.domain.User;
 import entus.resourceServer.domain.dto.page.*;
 import entus.resourceServer.domain.dto.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +23,10 @@ import java.util.List;
 public class ApiController {
     private final BoardService boardService;
     private final PedalService pedalService;
+    private final UserService userService;
+
     @GetMapping("/check")
-    public ApiResponse check(){
+    public ApiResponse check() {
         return new ApiResponse("success token check");
     }
 
@@ -67,8 +71,10 @@ public class ApiController {
     }
 
     @GetMapping("/board/{boardId}")
-    public BoardDetailPageDto apiBoardDetail(@PathVariable Long boardId) {
-        return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)));
+    public BoardDetailPageDto apiBoardDetail(Authentication authentication, @PathVariable Long boardId) {
+        Board board = boardService.get(boardId);
+        boolean isOwner = board.getUser().getId().equals(Long.parseLong((String) authentication.getPrincipal()));
+        return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)),isOwner);
     }
 
     @GetMapping("/pedal/{pedalId}")

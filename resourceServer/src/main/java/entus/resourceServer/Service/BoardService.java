@@ -17,6 +17,14 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final PedalService pedalService;
 
+    @Transactional
+    public Board update(Long boardId, String name, String description) {
+        Board board = boardRepository.findById(boardId).orElseThrow();
+        board.changeName(name);
+        board.changeDescription(description);
+        return board;
+    }
+
     public Board get(Long boardId) {
         return boardRepository.findById(boardId).orElse(null);
     }
