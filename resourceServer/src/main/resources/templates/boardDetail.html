@@ -279,6 +279,25 @@
             75% { transform: rotate(-5deg); }
             100% { transform: rotate(0deg); }
         }
+
+        .move-target-plus {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .move-target-plus:hover {
+            transform: scale(1.2);
+            background: rgba(255,255,255,0.5);
+        }
     </style>
 </head>
 <body>
@@ -300,8 +319,8 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="fas fa-info-circle me-2"></i>보드 상세 정보</span>
-            <div id="boardHeaderControls" style="display:none;">
-                <button id="editBoardBtn" class="btn btn-primary btn-sm"><i class="fas fa-edit me-1"></i>수정</button>
+            <div id="boardHeaderControls">
+                <button id="editBoardBtn" class="btn btn-primary btn-sm" style="display:none;"><i class="fas fa-edit me-1"></i>수정</button>
                 <div id="boardEditControls" class="d-inline-block" style="display:none;">
                     <button id="saveBoardBtn" class="btn btn-success btn-sm me-2"><i class="fas fa-check me-1"></i>저장</button>
                     <button id="cancelBoardBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times me-1"></i>취소</button>
@@ -349,16 +368,15 @@
     import { getData, postData } from "/js/api.js";
     import { getImageUrl } from "/js/getImageUrl.js";
 
-    // DOM 요소 참조
     const loadingEl = document.getElementById('loading');
     const errorEl = document.getElementById('error');
     const pedalListEl = document.getElementById('pedalList');
     const emptyMessageEl = document.getElementById('empty-message');
     const trashCanEl = document.getElementById('trashCan');
 
-    // 보드 상세 정보 관련 DOM 요소
     const boardLoadingEl = document.getElementById('boardLoading');
     const boardContentEl = document.getElementById('boardContent');
+    const boardHeaderControls = document.getElementById('boardHeaderControls');
 
     let isOwner = false;
     let currentBoardData = null;
@@ -376,7 +394,8 @@
             renderPedalList(currentBoardData.chain.pedals);
 
             if (isOwner) {
-                document.getElementById('boardHeaderControls').style.display = 'flex';
+                boardHeaderControls.style.display = 'flex';
+                document.getElementById('editBoardBtn').style.display = 'inline-block';
                 attachBoardEditListeners(boardId);
                 attachDragDropListeners(boardId);
             }
@@ -521,6 +540,19 @@
         emptyMessageEl.style.display = 'none';
         pedalListEl.style.display = 'flex';
 
+        if (isOwner) {
+            const firstAddTarget = document.createElement('div');
+            firstAddTarget.className = 'pedal-move-target';
+            firstAddTarget.innerHTML = `<span class="move-target-plus"><i class="fas fa-plus"></i></span>`;
+            firstAddTarget.dataset.moveIndex = 0;
+            pedalListEl.appendChild(firstAddTarget);
+
+            firstAddTarget.addEventListener('click', () => {
+                window.location.href = `/add-pedal/${boardId}?index=0`;
+            });
+        }
+
+
         pedals.forEach((pedal, index) => {
             const cardDiv = document.createElement('div');
             cardDiv.className = `pedal-item-card card shadow-sm ${isOwner ? 'editable' : ''}`;
@@ -547,11 +579,15 @@
             pedalListEl.appendChild(cardDiv);
 
             if (isOwner) {
-                const moveTarget = document.createElement('div');
-                moveTarget.className = 'pedal-move-target';
-                moveTarget.innerHTML = '<i class="fas fa-arrow-alt-circle-down"></i>';
-                moveTarget.dataset.moveIndex = index + 1;
-                pedalListEl.appendChild(moveTarget);
+                const addTarget = document.createElement('div');
+                addTarget.className = 'pedal-move-target';
+                addTarget.innerHTML = `<span class="move-target-plus"><i class="fas fa-plus"></i></span>`;
+                addTarget.dataset.moveIndex = index + 1;
+                pedalListEl.appendChild(addTarget);
+
+                addTarget.addEventListener('click', () => {
+                    window.location.href = `/add-pedal/${boardId}?index=${index + 1}`;
+                });
             } else if (index < pedals.length - 1) {
                 const arrowSpan = document.createElement('span');
                 arrowSpan.className = 'pedal-arrow';
@@ -559,26 +595,6 @@
                 pedalListEl.appendChild(arrowSpan);
             }
         });
-
-        if (isOwner && pedals.length > 0) {
-            const lastMoveTarget = document.createElement('div');
-            lastMoveTarget.className = 'pedal-move-target';
-            lastMoveTarget.innerHTML = '<i class="fas fa-arrow-alt-circle-down"></i>';
-            lastMoveTarget.dataset.moveIndex = pedals.length;
-            pedalListEl.insertBefore(lastMoveTarget, pedalListEl.children[0]);
-        }
-
-        if (isOwner) {
-            const addButtonWrapper = document.createElement('div');
-            addButtonWrapper.className = 'add-pedal-btn-wrapper';
-            const addButton = document.createElement('button');
-            addButton.className = 'btn btn-primary';
-            addButton.innerHTML = '<i class="fas fa-plus me-1"></i>추가';
-            addButton.addEventListener('click', () => {
-                window.location.href = `/add-pedal/${boardId}`;
-            });
-            pedalListEl.appendChild(addButtonWrapper);
-        }
     }
 
     function attachDragDropListeners(boardId) {
@@ -636,7 +652,8 @@
                 }
             } else if (target.classList.contains('pedal-move-target')) {
                 const newIndex = parseInt(target.dataset.moveIndex);
-                if (newIndex === originalIndex || newIndex === originalIndex + 1) {
+                if (newIndex === originalIndex || (newIndex === originalIndex + 1)) {
+                    // Do nothing if dropped on the same or adjacent spot.
                     return;
                 }
                 try {
