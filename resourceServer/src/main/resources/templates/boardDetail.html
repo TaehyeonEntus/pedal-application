@@ -226,37 +226,53 @@
 
         .trash-can-container {
             display: none;
-            position: absolute;
-            top: 50%;
-            right: 1.5rem;
-            transform: translateY(-50%);
-            transition: all 0.3s ease;
-            transform: scale(0.9);
-            opacity: 0.8;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             z-index: 100;
+            transition: all 0.3s ease;
         }
 
         .trash-can-container.active {
-            display: block;
-            transform: scale(1) translateY(-50%);
             opacity: 1;
         }
 
+        .trash-can-container:not(.active) {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
         .trash-can-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: #dc3545;
         }
 
+        .trash-can-container.drag-over {
+            transform: scale(1.1);
+            background: #dc3545;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+        }
+
         .trash-can-container.drag-over .trash-can-icon {
+            color: white;
             animation: shake 0.5s infinite;
         }
 
         @keyframes shake {
-            0% { transform: rotate(0deg) translateY(-50%); }
-            25% { transform: rotate(5deg) translateY(-50%); }
-            50% { transform: rotate(0deg) translateY(-50%); }
-            75% { transform: rotate(-5deg) translateY(-50%); }
-            100% { transform: rotate(0deg) translateY(-50%); }
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
         }
 
         .edit-pedal-btn {
@@ -312,22 +328,11 @@
             </div>
             <div id="boardContent"></div>
         </div>
-        <div id="boardEditContainer" class="card-footer" style="display:none;">
-            <button id="editBoardBtn" class="btn btn-primary me-2"><i class="fas fa-edit me-1"></i>수정</button>
-            <button id="saveBoardBtn" class="btn btn-success me-2" style="display:none;"><i class="fas fa-check me-1"></i>저장</button>
-            <button id="cancelBoardBtn" class="btn btn-secondary" style="display:none;"><i class="fas fa-times me-1"></i>취소</button>
-        </div>
     </div>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="fas fa-sliders-h me-2"></i>🎚️ 페달 체인</span>
-            <div id="pedalChainControls" class="d-flex align-items-center">
-                <div id="trashCan" class="trash-can-container me-2" style="display: none;">
-                    <i class="fas fa-trash-alt trash-can-icon"></i>
-                </div>
-                <button id="editPedalChainBtn" class="edit-pedal-btn"><i class="fas fa-edit me-1"></i>페달 순서 변경</button>
-            </div>
         </div>
         <div class="card-body">
             <div id="loading" class="loading-spinner">
@@ -342,6 +347,10 @@
             </div>
         </div>
     </div>
+</div>
+
+<div id="trashCan" class="trash-can-container" style="display: none;">
+    <i class="fas fa-trash-alt trash-can-icon"></i>
 </div>
 
 <footer>
@@ -359,45 +368,33 @@
     const pedalListEl = document.getElementById('pedalList');
     const emptyMessageEl = document.getElementById('empty-message');
     const trashCanEl = document.getElementById('trashCan');
-    const editPedalChainBtn = document.getElementById('editPedalChainBtn');
 
     // 보드 상세 정보 관련 DOM 요소
     const boardLoadingEl = document.getElementById('boardLoading');
     const boardContentEl = document.getElementById('boardContent');
-    const boardEditContainerEl = document.getElementById('boardEditContainer');
 
     let isOwner = false; // 소유자 여부를 저장할 전역 변수
     let currentBoardData = null; // 보드 정보를 저장할 변수
-    let isPedalChainEditMode = false;
 
     window.addEventListener('DOMContentLoaded', async () => {
         const boardId = getBoardIdFromPath();
         showLoadingState();
 
         try {
-            // 보드 정보와 소유자 여부를 한 번의 호출로 가져옴
             const response = await getData(`/api/board/${boardId}`);
 
-            // 전역 변수 설정
             isOwner = response.owner;
             currentBoardData = response.boardDetail;
 
-            // 각 컴포넌트 렌더링
             renderBoardInfo(currentBoardData.info);
             renderPedalList(currentBoardData.chain.pedals);
 
-            // 소유자 여부에 따라 UI 제어
             if (isOwner) {
-                boardEditContainerEl.style.display = 'block';
-                editPedalChainBtn.style.display = 'inline-block';
                 attachBoardEditListeners(boardId);
                 attachDragDropListeners(boardId);
-            } else {
-                boardEditContainerEl.style.display = 'none';
-                editPedalChainBtn.style.display = 'none';
             }
-            hideLoadingState();
 
+            hideLoadingState();
         } catch (err) {
             console.error("데이터 로딩 실패:", err);
             showErrorState();
@@ -429,20 +426,23 @@
         errorEl.style.display = 'block';
     }
 
-    // URL에서 boardId 추출
     function getBoardIdFromPath() {
         const pathParts = window.location.pathname.split('/');
         return pathParts[pathParts.length - 1];
     }
 
-    // 보드 정보 렌더링
     function renderBoardInfo(info) {
         const boardInfoHtml = `
             <img id="boardImage" alt="Board Image" class="board-img ${isOwner ? 'board-img-editable' : ''} mb-3 me-md-4" src="${getImageUrl(info.boardImageUrl)}">
             <input type="file" id="boardImageInput" style="display:none;" accept="image/*">
             <div class="text-center text-md-start">
-                <h1 id="boardNameDisplay" class="display-5 fw-bold text-dark">${info.boardName || '보드 이름'}</h1>
-                <input type="text" id="boardNameInput" class="form-control editable-field" value="${info.boardName || ''}">
+                <h1 id="boardNameDisplay" class="display-5 fw-bold text-dark d-inline-block">${info.boardName || '보드 이름'}</h1>
+                <button id="editBoardBtn" class="btn btn-primary btn-sm ms-3" style="display:none;"><i class="fas fa-edit me-1"></i>수정</button>
+                <div id="boardEditControls" class="d-inline-block" style="display:none;">
+                    <button id="saveBoardBtn" class="btn btn-success btn-sm me-2"><i class="fas fa-check me-1"></i>저장</button>
+                    <button id="cancelBoardBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times me-1"></i>취소</button>
+                </div>
+                <input type="text" id="boardNameInput" class="form-control editable-field mt-2" value="${info.boardName || ''}">
                 <p class="lead text-muted">
                     <i class="fas fa-user me-2"></i>작성자: <span id="boardOwner">${info.boardOwner || '-'}</span>
                 </p>
@@ -462,13 +462,16 @@
             </div>
         `;
         boardContentEl.innerHTML = boardInfoHtml;
+        if (isOwner) {
+            document.getElementById('editBoardBtn').style.display = 'inline-block';
+        }
     }
 
-    // 보드 수정 기능 관련 이벤트 리스너
     function attachBoardEditListeners(boardId) {
         const editBtn = document.getElementById('editBoardBtn');
         const saveBtn = document.getElementById('saveBoardBtn');
         const cancelBtn = document.getElementById('cancelBoardBtn');
+        const boardEditControls = document.getElementById('boardEditControls');
         const boardImage = document.getElementById('boardImage');
         const boardImageInput = document.getElementById('boardImageInput');
         const boardNameDisplay = document.getElementById('boardNameDisplay');
@@ -481,10 +484,8 @@
             boardNameInput.style.display = 'block';
             boardDescriptionDisplay.style.display = 'none';
             boardDescriptionInput.style.display = 'block';
-
             editBtn.style.display = 'none';
-            saveBtn.style.display = 'inline-block';
-            cancelBtn.style.display = 'inline-block';
+            boardEditControls.style.display = 'inline-block';
         });
 
         saveBtn.addEventListener('click', async () => {
@@ -493,59 +494,30 @@
             const imageFile = boardImageInput.files[0];
 
             try {
-                boardContentEl.innerHTML = `
-                    <div class="loading-spinner text-center" style="width: 100%;">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">보드 정보 저장중...</p>
-                    </div>
-                `;
-
-                let imageUrl = currentBoardData.info.boardImageUrl;
                 if (imageFile) {
                     const { uploadUrl, objectKey } = await postData(`/board/${boardId}/upload`);
                     await fetch(uploadUrl, { method: "PUT", body: imageFile, headers: { "Content-Type": imageFile.type } });
                     await postData(`/board/${boardId}/upload/success`, { objectKey: objectKey });
-                    imageUrl = objectKey;
                 }
 
                 const updateData = { name: newName, description: newDescription };
-                // updateBoard API는 BoardInfoDto를 반환하므로 해당 값을 직접 사용
-                const updatedBoardInfo = await postData(`/board/${boardId}/update`, updateData);
-
-                // 전역 데이터 업데이트
-                currentBoardData.info = {
-                    ...updatedBoardInfo,
-                    boardImageUrl: imageUrl
-                };
-
-                // UI 렌더링
-                renderBoardInfo(currentBoardData.info);
-
-                editBtn.style.display = 'inline-block';
-                saveBtn.style.display = 'none';
-                cancelBtn.style.display = 'none';
+                await postData(`/board/${boardId}/update`, updateData);
 
                 alert('보드가 성공적으로 수정되었습니다.');
+                window.location.reload();
             } catch (err) {
                 console.error("보드 수정 실패:", err);
                 alert('수정 중 오류가 발생했습니다.');
-                // 실패 시 기존 데이터로 롤백
-                renderBoardInfo(currentBoardData.info);
             }
         });
 
         cancelBtn.addEventListener('click', () => {
-            boardNameInput.value = currentBoardData.info.boardName;
-            boardDescriptionInput.value = currentBoardData.info.boardDescription;
-
-            boardNameDisplay.style.display = 'block';
+            boardNameDisplay.style.display = 'inline-block';
             boardNameInput.style.display = 'none';
             boardDescriptionDisplay.style.display = 'block';
             boardDescriptionInput.style.display = 'none';
-
             editBtn.style.display = 'inline-block';
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
+            boardEditControls.style.display = 'none';
         });
 
         if (boardImage) {
@@ -553,22 +525,8 @@
                 boardImageInput.click();
             });
         }
-
-        if (boardImageInput) {
-            boardImageInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        boardImage.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
     }
 
-    // 페달 리스트 렌더링
     function renderPedalList(pedals) {
         pedalListEl.innerHTML = '';
         const boardId = getBoardIdFromPath();
@@ -584,13 +542,13 @@
 
         pedals.forEach((pedal, index) => {
             const cardDiv = document.createElement('div');
-            cardDiv.className = `pedal-item-card card shadow-sm ${isPedalChainEditMode ? 'editable' : ''}`;
+            cardDiv.className = `pedal-item-card card shadow-sm ${isOwner ? 'editable' : ''}`;
             cardDiv.dataset.pedalId = pedal.pedalId;
-            cardDiv.draggable = isPedalChainEditMode;
+            cardDiv.draggable = isOwner;
 
             cardDiv.innerHTML = `
                 <div class="clickable-hint">
-                    <i class="fas ${isPedalChainEditMode ? 'fa-arrows-alt' : 'fa-eye'}"></i>
+                    <i class="fas ${isOwner ? 'fa-arrows-alt' : 'fa-eye'}"></i>
                 </div>
                 <img src="${getImageUrl(pedal.pedalImageUrl)}" alt="Pedal Image" class="pedal-img">
                 <div class="pedal-info">
@@ -599,7 +557,7 @@
                 </div>
             `;
 
-            if (!isPedalChainEditMode) {
+            if (!isOwner) {
                 cardDiv.addEventListener('click', () => {
                     window.location.href = `/pedal/${pedal.pedalId}`;
                 });
@@ -607,7 +565,7 @@
 
             pedalListEl.appendChild(cardDiv);
 
-            if (!isPedalChainEditMode && index < pedals.length - 1) {
+            if (!isOwner && index < pedals.length - 1) {
                 const arrowSpan = document.createElement('span');
                 arrowSpan.className = 'pedal-arrow';
                 arrowSpan.innerHTML = '<i class="fas fa-long-arrow-alt-right"></i>';
@@ -628,30 +586,25 @@
         }
     }
 
-    // 드래그 앤 드롭 이벤트 리스너
     function attachDragDropListeners(boardId) {
         let draggedPedalCard = null;
+        let originalIndex = -1;
 
         pedalListEl.addEventListener('dragstart', (e) => {
-            if (!isPedalChainEditMode) {
-                e.preventDefault();
-                return;
-            }
             draggedPedalCard = e.target.closest('.pedal-item-card');
             if (draggedPedalCard) {
+                originalIndex = Array.from(pedalListEl.children).indexOf(draggedPedalCard);
                 e.dataTransfer.setData('text/plain', draggedPedalCard.dataset.pedalId);
                 e.dataTransfer.effectAllowed = 'move';
-                setTimeout(() => draggedPedalCard.classList.add('dragging'), 0);
-                trashCanEl.classList.add('active');
+                setTimeout(() => {
+                    draggedPedalCard.classList.add('dragging');
+                    trashCanEl.style.display = 'flex';
+                }, 0);
             }
         });
 
         pedalListEl.addEventListener('dragover', (e) => {
-            if (!isPedalChainEditMode) return;
             e.preventDefault();
-
-            const target = e.target.closest('.pedal-item-card');
-
             const afterElement = getDragAfterElement(pedalListEl, e.clientX);
             const existingLine = pedalListEl.querySelector('.pedal-drag-over-line');
 
@@ -671,35 +624,19 @@
             }
         });
 
-        pedalListEl.addEventListener('dragenter', (e) => {
-            if (!isPedalChainEditMode) return;
-            const target = e.target.closest('.pedal-item-card');
-            if (target && target !== draggedPedalCard) {
-                target.classList.add('drag-over');
-            }
-        });
-
-        pedalListEl.addEventListener('dragleave', (e) => {
-            if (!isPedalChainEditMode) return;
-            e.target.classList.remove('drag-over');
-        });
-
         pedalListEl.addEventListener('drop', async (e) => {
-            if (!isPedalChainEditMode) return;
             e.preventDefault();
-
             const fromPedalId = draggedPedalCard.dataset.pedalId;
             const toElement = e.target.closest('.pedal-item-card');
 
             pedalListEl.querySelector('.pedal-drag-over-line')?.remove();
 
-            let updatedChain;
             if (toElement && toElement !== draggedPedalCard) {
                 const toPedalId = toElement.dataset.pedalId;
                 try {
-                    // swapPedal API는 BoardChainDto를 반환
-                    updatedChain = await postData(`/board/${boardId}/swap`, { pedal1Id: parseInt(fromPedalId), pedal2Id: parseInt(toPedalId) });
+                    await postData(`/board/${boardId}/swap`, { pedal1Id: parseInt(fromPedalId), pedal2Id: parseInt(toPedalId) });
                     alert('페달이 성공적으로 교체되었습니다.');
+                    window.location.reload();
                 } catch (err) {
                     console.error("페달 스왑 실패:", err);
                     alert('교체에 실패했습니다.');
@@ -707,56 +644,51 @@
             } else {
                 const afterElement = getDragAfterElement(pedalListEl, e.clientX);
                 const pedals = [...pedalListEl.querySelectorAll('.pedal-item-card')];
-                const newIndex = afterElement ? pedals.indexOf(afterElement) : pedals.length - 1;
+                const newIndex = afterElement ? pedals.indexOf(afterElement) : pedals.length;
 
-                try {
-                    // movePedal API는 BoardChainDto를 반환
-                    updatedChain = await postData(`/board/${boardId}/move`, { pedalId: parseInt(fromPedalId), destination: newIndex });
-                    alert('페달이 성공적으로 이동되었습니다.');
-                } catch (err) {
-                    console.error("페달 이동 실패:", err);
-                    alert('이동에 실패했습니다.');
+                if (newIndex === originalIndex || (newIndex === originalIndex + 1)) {
+                    // Do nothing if dropped on the same or adjacent spot.
+                } else {
+                    try {
+                        await postData(`/board/${boardId}/move`, { pedalId: parseInt(fromPedalId), destination: newIndex > originalIndex ? newIndex - 1 : newIndex });
+                        alert('페달이 성공적으로 이동되었습니다.');
+                        window.location.reload();
+                    } catch (err) {
+                        console.error("페달 이동 실패:", err);
+                        alert('이동에 실패했습니다.');
+                    }
                 }
-            }
-            if (updatedChain) {
-                currentBoardData.chain = updatedChain;
-                renderPedalList(currentBoardData.chain.pedals);
             }
         });
 
-        pedalListEl.addEventListener('dragend', (e) => {
-            if (!isPedalChainEditMode || !draggedPedalCard) return;
+        pedalListEl.addEventListener('dragend', () => {
+            if (!draggedPedalCard) return;
             draggedPedalCard.classList.remove('dragging');
             document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
             pedalListEl.querySelector('.pedal-drag-over-line')?.remove();
-            trashCanEl.classList.remove('active');
+            trashCanEl.style.display = 'none';
         });
 
         trashCanEl.addEventListener('dragover', (e) => {
-            if (!isPedalChainEditMode) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
             trashCanEl.classList.add('drag-over');
         });
 
         trashCanEl.addEventListener('dragleave', () => {
-            if (!isPedalChainEditMode) return;
             trashCanEl.classList.remove('drag-over');
         });
 
         trashCanEl.addEventListener('drop', async (e) => {
-            if (!isPedalChainEditMode) return;
             e.preventDefault();
             const pedalId = e.dataTransfer.getData('text/plain');
             trashCanEl.classList.remove('drag-over');
 
             if (confirm('정말 이 페달을 삭제하시겠습니까?')) {
                 try {
-                    // deletePedal API는 BoardChainDto를 반환
-                    const updatedChain = await postData(`/board/${boardId}/delete`, { pedalId: parseInt(pedalId) });
+                    await postData(`/board/${boardId}/delete`, { pedalId: parseInt(pedalId) });
                     alert('페달이 성공적으로 삭제되었습니다.');
-                    currentBoardData.chain = updatedChain;
-                    renderPedalList(currentBoardData.chain.pedals);
+                    window.location.reload();
                 } catch (err) {
                     console.error("페달 삭제 실패:", err);
                     alert('삭제에 실패했습니다.');
@@ -778,25 +710,6 @@
             }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
-
-    // Edit Pedal Chain button logic
-    editPedalChainBtn.addEventListener('click', async () => {
-        isPedalChainEditMode = !isPedalChainEditMode;
-
-        if (isPedalChainEditMode) {
-            editPedalChainBtn.textContent = '편집 모드 종료';
-            editPedalChainBtn.classList.remove('edit-pedal-btn');
-            editPedalChainBtn.classList.add('btn-secondary');
-            trashCanEl.style.display = 'block';
-        } else {
-            editPedalChainBtn.textContent = '페달 순서 변경';
-            editPedalChainBtn.classList.remove('btn-secondary');
-            editPedalChainBtn.classList.add('edit-pedal-btn');
-            trashCanEl.style.display = 'none';
-        }
-
-        renderPedalList(currentBoardData.chain.pedals);
-    });
 </script>
 </body>
 </html>
