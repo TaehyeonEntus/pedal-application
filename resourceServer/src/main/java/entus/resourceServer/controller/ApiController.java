@@ -77,6 +77,16 @@ public class ApiController {
         return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)), owner);
     }
 
+    @GetMapping("/board/{boardId}/info")
+    public BoardInfoDto apiBoardInfo(@PathVariable Long boardId) {
+        return new BoardInfoDto(boardService.get(boardId));
+    }
+
+    @GetMapping("/board/{boardId}/chain")
+    public BoardChainDto apiBoardChain(@PathVariable Long boardId) {
+        return new BoardChainDto(boardService.get(boardId));
+    }
+
     @GetMapping("/pedal/{pedalId}")
     public PedalDetailPageDto apiPedalDetail(@PathVariable Long pedalId) {
         return new PedalDetailPageDto(new PedalDetailDto(pedalService.get(pedalId)));

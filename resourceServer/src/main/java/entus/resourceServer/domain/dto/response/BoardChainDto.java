@@ -8,10 +8,10 @@ import java.util.Comparator;
 import java.util.List;
 
 @Data
-public class SwapPedalResponseDto {
+public class BoardChainDto {
     private List<PedalListDto> pedals;
 
-    public SwapPedalResponseDto(Board board) {
+    public BoardChainDto(Board board) {
         this.pedals = board.getPedals()
                 .stream()
                 .sorted(Comparator.comparingInt(BoardPedal::getOrderIndex))

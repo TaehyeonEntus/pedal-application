@@ -29,9 +29,8 @@ public class BoardController {
     }
 
     @PostMapping("/{boardId}/update")
-    public UpdateBoardResponseDto updateBoard(@PathVariable Long boardId, @RequestBody UpdateBoardRequestDto dto){
-        Board board = boardService.update(boardId, dto.getName(), dto.getDescription());
-        return new UpdateBoardResponseDto(board.getName(), board.getDescription(), board.getImageUrl());
+    public BoardInfoDto updateBoard(@PathVariable Long boardId, @RequestBody UpdateBoardInfoRequestDto dto) {
+        return new BoardInfoDto(boardService.update(boardId, dto.getName(), dto.getDescription()));
     }
 
     @PostMapping("/{boardId}/upload")
@@ -53,17 +52,17 @@ public class BoardController {
     }
 
     @PostMapping("/{boardId}/delete")
-    public DeletePedalResponseDto deletePedal(@PathVariable Long boardId, @RequestBody DeletePedalRequestDto dto) {
-        return new DeletePedalResponseDto(boardService.removePedal(boardId, dto.getPedalId()));
+    public BoardChainDto deletePedal(@PathVariable Long boardId, @RequestBody DeletePedalRequestDto dto) {
+        return new BoardChainDto(boardService.removePedal(boardId, dto.getPedalId()));
     }
 
     @PostMapping("/{boardId}/move")
-    public MovePedalResponseDto movePedal(@PathVariable Long boardId, @RequestBody MovePedalRequestDto dto) {
-        return new MovePedalResponseDto(boardService.movePedal(boardId, dto.getPedalId(), dto.getDestination()));
+    public BoardChainDto movePedal(@PathVariable Long boardId, @RequestBody MovePedalRequestDto dto) {
+        return new BoardChainDto(boardService.movePedal(boardId, dto.getPedalId(), dto.getDestination()));
     }
 
     @PostMapping("/{boardId}/swap")
-    public SwapPedalResponseDto swapPedal(@PathVariable Long boardId, @RequestBody SwapPedalRequestDto dto) {
-        return new SwapPedalResponseDto(boardService.swapPedal(boardId, dto.getPedal1Id(), dto.getPedal2Id()));
+    public BoardChainDto swapPedal(@PathVariable Long boardId, @RequestBody SwapPedalRequestDto dto) {
+        return new BoardChainDto(boardService.swapPedal(boardId, dto.getPedal1Id(), dto.getPedal2Id()));
     }
 }
