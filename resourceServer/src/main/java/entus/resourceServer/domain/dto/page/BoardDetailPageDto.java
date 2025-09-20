@@ -6,10 +6,10 @@ import lombok.Data;
 @Data
 public class BoardDetailPageDto {
     BoardDetailDto boardDetail;
-    boolean isOwner;
+    boolean owner;
 
-    public BoardDetailPageDto(BoardDetailDto boardDetailDto, boolean isOwner) {
+    public BoardDetailPageDto(BoardDetailDto boardDetailDto, boolean owner) {
         this.boardDetail = boardDetailDto;
-        this.isOwner = isOwner;
+        this.owner = owner;
     }
 }

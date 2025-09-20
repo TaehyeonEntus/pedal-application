@@ -292,9 +292,9 @@
             const data = await getData(`/api/board/${boardId}`);
             currentBoardData = data.boardDetail;
             renderBoardInfo(data);
-            renderPedalList(data.boardDetail.pedals || [], data.isOwner);
+            renderPedalList(data.boardDetail.pedals || [], data.owner);
 
-            if (data.isOwner) {
+            if (data.owner) {
                 boardEditContainerEl.style.display = 'block';
                 attachBoardEditListeners(boardId);
             } else {
@@ -337,9 +337,9 @@
     // 보드 정보 렌더링
     function renderBoardInfo(data) {
         const board = data.boardDetail;
-        const isOwner = data.isOwner;
+        const owner = data.owner;
         const boardInfoHtml = `
-            <img id="boardImage" alt="Board Image" class="board-img ${isOwner ? 'board-img-editable' : ''} mb-3 me-md-4" src="${getImageUrl(board.boardImageUrl)}">
+            <img id="boardImage" alt="Board Image" class="board-img ${owner ? 'board-img-editable' : ''} mb-3 me-md-4" src="${getImageUrl(board.boardImageUrl)}">
             <input type="file" id="boardImageInput" style="display:none;" accept="image/*">
             <div class="text-center text-md-start">
                 <h1 id="boardNameDisplay" class="display-5 fw-bold text-dark">${board.boardName || '보드 이름'}</h1>
@@ -488,11 +488,11 @@
     }
 
     // 페달 리스트 렌더링 (클릭 기능 추가)
-    function renderPedalList(pedals, isOwner) {
+    function renderPedalList(pedals, owner) {
         pedalListEl.innerHTML = '';
         const boardId = getBoardIdFromPath();
 
-        if (pedals.length === 0 && !isOwner) {
+        if (pedals.length === 0 && !owner) {
             emptyMessageEl.style.display = 'block';
             pedalListEl.style.display = 'none';
             return;
@@ -529,8 +529,8 @@
             }
         });
 
-        // isOwner일 경우에만 페달 추가 버튼을 맨 끝에 추가
-        if (isOwner) {
+        // owner일 경우에만 페달 추가 버튼을 맨 끝에 추가
+        if (owner) {
             const addButtonWrapper = document.createElement('div');
             addButtonWrapper.className = 'add-pedal-btn-wrapper';
             const addButton = document.createElement('button');

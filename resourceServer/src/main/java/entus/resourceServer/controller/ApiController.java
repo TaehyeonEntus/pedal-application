@@ -73,8 +73,8 @@ public class ApiController {
     @GetMapping("/board/{boardId}")
     public BoardDetailPageDto apiBoardDetail(Authentication authentication, @PathVariable Long boardId) {
         Board board = boardService.get(boardId);
-        boolean isOwner = board.getUser().getId().equals(Long.parseLong((String) authentication.getPrincipal()));
-        return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)),isOwner);
+        boolean owner = board.getUser().getId().equals(Long.parseLong((String) authentication.getPrincipal()));
+        return new BoardDetailPageDto(new BoardDetailDto(boardService.get(boardId)), owner);
     }
 
     @GetMapping("/pedal/{pedalId}")
