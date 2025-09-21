@@ -80,6 +80,26 @@
             margin: 2rem 0;
         }
 
+        .image-preview-container {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .image-preview-container.drag-over {
+            border-color: #007bff; /* 드래그 오버 시 테두리 색상 변경 */
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            display: none; /* 초기에는 숨김 */
+        }
+
         footer {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -121,8 +141,16 @@
                     <textarea class="form-control" id="description" rows="3"></textarea>
                 </div>
                 <div class="mb-3">
-                    <label for="image" class="form-label">보드 이미지 (선택)</label>
-                    <input type="file" class="form-control" id="image" accept="image/*">
+                    <label class="form-label">보드 이미지 (드래그 & 드롭 또는 클릭)</label>
+                    <div id="imagePreviewContainer" class="image-preview-container">
+                        <img id="imagePreview" src="#" alt="Image Preview" class="image-preview">
+                        <p id="previewText" class="text-muted">
+                            <i class="fas fa-cloud-upload-alt me-2"></i>파일을 여기에 끌어다 놓으세요
+                            <br>
+                            <span class="text-secondary">(또는 클릭하여 업로드)</span>
+                        </p>
+                    </div>
+                    <input type="file" class="form-control" id="image" accept="image/*" style="display: none;">
                 </div>
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="fas fa-save me-2"></i>보드 생성하기
@@ -144,58 +172,106 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script type="module">
-    import {getData, postData} from "/js/api.js";
+    import { getData, postData } from "/js/api.js";
 
-    const check = await getData("/api/check");
     // DOM 요소 참조
     const form = document.getElementById("addBoardForm");
     const loadingEl = document.getElementById("loading");
     const errorEl = document.getElementById("error");
+    const imageInput = document.getElementById("image");
+    const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+    const imagePreview = document.getElementById("imagePreview");
+    const previewText = document.getElementById("previewText");
+
+    // 이미지 미리보기 및 드래그앤드롭 관련 함수
+    function handleFile(file) {
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                previewText.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imageInput.value = '';
+            imagePreview.style.display = 'none';
+            previewText.style.display = 'block';
+            alert('이미지 파일만 업로드할 수 있습니다.');
+        }
+    }
+
+    // 파일 선택(클릭) 이벤트
+    imagePreviewContainer.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    imageInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0]);
+    });
+
+    // 드래그앤드롭 이벤트 리스너
+    imagePreviewContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        imagePreviewContainer.classList.add('drag-over');
+    });
+
+    imagePreviewContainer.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        imagePreviewContainer.classList.remove('drag-over');
+    });
+
+    imagePreviewContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        imagePreviewContainer.classList.remove('drag-over');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            imageInput.files = files; // 드롭된 파일을 input 요소에 할당
+            handleFile(files[0]);
+        }
+    });
 
     // 폼 제출 이벤트 리스너
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        errorEl.style.display = "none";
+
+        // 폼 숨기기
+        form.style.display = "none";
+        // 로딩 상태 표시
         loadingEl.style.display = "block";
-        loadingEl.querySelector("p").textContent = "보드를 생성 중...";
+        errorEl.style.display = "none";
 
         const name = document.getElementById("name").value;
         const description = document.getElementById("description").value;
-        const imageFile = document.getElementById("image").files[0];
+        const imageFile = imageInput.files[0];
 
         try {
-            // 1. 보드 생성
             const {boardId} = await postData("/board/add", {name, description});
 
-            // 2. 이미지가 없으면 바로 상세로 이동
-            if (!imageFile) {
-                window.location.href = `/board/${boardId}`;
-                return;
+            if (imageFile) {
+                const {uploadUrl, objectKey} = await postData(`/board/${boardId}/upload`);
+                await fetch(uploadUrl, {
+                    method: "PUT",
+                    body: imageFile,
+                    headers: {"Content-Type": imageFile.type}
+                });
+                await postData(`/board/${boardId}/upload/success`, {objectKey: objectKey});
             }
 
-            // 3. presigned URL 요청
-            const {uploadUrl, objectKey} = await postData(`/board/${boardId}/upload`);
-
-            // 4. 브라우저에서 직접 업로드
-            await fetch(uploadUrl, {
-                method: "PUT",
-                body: imageFile,
-                headers: {"Content-Type": imageFile.type}
-            });
-
-            // 5. 업로드 성공 알림
-            await postData(`/board/${boardId}/upload/success`, {objectKey: objectKey});
-
-            // 6. 상세 페이지로 이동
             window.location.href = `/board/${boardId}`;
         } catch (err) {
             console.error("보드 추가 실패:", err);
             errorEl.textContent = err.message || "보드 생성 중 오류가 발생했습니다.";
             errorEl.style.display = "block";
-        } finally {
             loadingEl.style.display = "none";
+            form.style.display = "block";
         }
     });
+
 </script>
 </body>
 </html>
