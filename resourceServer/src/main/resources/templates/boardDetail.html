@@ -332,7 +332,7 @@
                 <div class="spinner-border text-primary" role="status"></div>
                 <p class="mt-2 text-muted">보드 정보를 불러오는 중...</p>
             </div>
-            <div id="boardContent"></div>
+            <div id="boardContent" style="display: none;"></div>
         </div>
     </div>
 
@@ -477,6 +477,10 @@
         const boardDescriptionDisplay = document.getElementById('boardDescriptionDisplay');
         const boardDescriptionInput = document.getElementById('boardDescriptionInput');
 
+        // Initial state
+        boardEditControls.style.display = 'none';
+        editBtn.style.display = 'inline-block';
+
         editBtn.addEventListener('click', () => {
             boardNameDisplay.style.display = 'none';
             boardNameInput.style.display = 'block';
@@ -499,7 +503,7 @@
                 }
 
                 const updateData = { name: newName, description: newDescription };
-                await postData(`/board/${boardId}/update`, updateData);
+                await postData(`/board/${boardId}/id`, updateData); // Path changed for logical consistency
 
                 alert('보드가 성공적으로 수정되었습니다.');
                 window.location.reload();
@@ -628,7 +632,10 @@
         });
 
         pedalListEl.addEventListener('dragleave', (e) => {
-            e.target.classList.remove('drag-over');
+            const target = e.target.closest('.pedal-item-card, .pedal-move-target');
+            if (target) {
+                target.classList.remove('drag-over');
+            }
         });
 
         pedalListEl.addEventListener('drop', async (e) => {
@@ -653,7 +660,6 @@
             } else if (target.classList.contains('pedal-move-target')) {
                 const newIndex = parseInt(target.dataset.moveIndex);
                 if (newIndex === originalIndex || (newIndex === originalIndex + 1)) {
-                    // Do nothing if dropped on the same or adjacent spot.
                     return;
                 }
                 try {
@@ -699,6 +705,9 @@
                     alert('삭제에 실패했습니다.');
                 }
             }
+            // Ensure the trash can is hidden after any drop
+            trashCanEl.classList.remove('active');
+            pedalListEl.dispatchEvent(new Event('dragend'));
         });
     }
 </script>
