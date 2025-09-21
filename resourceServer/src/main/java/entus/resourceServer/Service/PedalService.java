@@ -28,18 +28,8 @@ public class PedalService {
         return pedalRepository.findAll(pageable);
     }
 
-    public List<Pedal> findByCategory(Category category) {
-        List<Pedal> pedals = new ArrayList<>();
-
-        // 최하위 카테고리, 실제 페달인 경우
-        if (category.getChildren().isEmpty())
-            pedals.addAll(pedalRepository.findByCategory(category));
-            // 하위 카테고리가 있는 경우, 하위 탐색
-        else
-            for (Category child : category.getChildren())
-                pedals.addAll(findByCategory(child));
-
-        return pedals;
+    public Page<Pedal> getAllByCategory(Category category, Pageable pageable) {
+        return pedalRepository.findAllByCategory(category, pageable);
     }
 
     public List<Pedal> get20() {

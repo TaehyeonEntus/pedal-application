@@ -5,6 +5,8 @@ import entus.resourceServer.repository.BrandRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BrandService {
@@ -16,5 +18,9 @@ public class BrandService {
 
     public Long add(Brand brand) {
         return brandRepository.save(brand).getId();
+    }
+
+    public List<Brand> getAll(){
+        return brandRepository.findAll();
     }
 }

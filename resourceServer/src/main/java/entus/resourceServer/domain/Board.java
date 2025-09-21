@@ -50,10 +50,6 @@ public class Board extends BaseEntity {
         return board;
     }
 
-    public void addPedal(Pedal pedal) {
-        this.pedals.add(BoardPedal.create(this, pedal, getPedals().size()));
-    }
-
     //<-- 수정 메서드 -->
     public void changeName(String name) {
         this.name = name;
@@ -63,16 +59,21 @@ public class Board extends BaseEntity {
         this.description = description;
     }
 
-    public void changeImageUrl(String newImageUrl){
+    public void changeImageUrl(String newImageUrl) {
         this.imageUrl = newImageUrl;
     }
 
     //<-- 비즈니스 메서드 -->
-    public void movePedal(Pedal pedal, int newIndex) {
-        //인덱스 범위 초과
-        if (newIndex >= getPedals().size())
-            throw new IndexOutOfBoundsException();
+    public void insertPedal(Pedal pedal, int newIndex) {
+        pedals.stream()
+                .filter(boardPedal -> boardPedal.getOrderIndex() >= newIndex)
+                .forEach(boardPedal -> boardPedal.changeOrderIndex(boardPedal.getOrderIndex() + 1));
 
+        this.pedals.add(BoardPedal.create(this, pedal, newIndex));
+    }
+
+
+    public void movePedal(Pedal pedal, int newIndex) {
         BoardPedal boardPedal = getPedals().stream()
                 .filter(p -> p.getPedal().equals(pedal))
                 .findFirst()

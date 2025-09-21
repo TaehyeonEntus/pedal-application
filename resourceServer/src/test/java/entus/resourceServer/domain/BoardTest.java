@@ -128,7 +128,7 @@ class BoardTest {
         pedalRepository.save(pedal);
 
         //when
-        board.addPedal(pedal);
+        board.insertPedal(pedal,0);
         BoardPedal boardPedal = board.getPedals().get(0);
 
         //then
@@ -169,11 +169,11 @@ class BoardTest {
         pedalRepository.save(pedal5);
 
         //when
-        board.addPedal(pedal1);
-        board.addPedal(pedal2);
-        board.addPedal(pedal3);
-        board.addPedal(pedal4);
-        board.addPedal(pedal5);
+        board.insertPedal(pedal1,0);
+        board.insertPedal(pedal2,1);
+        board.insertPedal(pedal3,2);
+        board.insertPedal(pedal4,3);
+        board.insertPedal(pedal5,4);
 
         board.movePedal(pedal5, 0);
 
@@ -224,11 +224,11 @@ class BoardTest {
         Pedal pedal5 = Pedal.create("페달5", "설명5", brand, category);
         pedalRepository.save(pedal5);
         //when
-        board.addPedal(pedal1);
-        board.addPedal(pedal2);
-        board.addPedal(pedal3);
-        board.addPedal(pedal4);
-        board.addPedal(pedal5);
+        board.insertPedal(pedal1,0);
+        board.insertPedal(pedal2,1);
+        board.insertPedal(pedal3,2);
+        board.insertPedal(pedal4,3);
+        board.insertPedal(pedal5,4);
 
         board.swapPedal(pedal2, pedal4);
 
@@ -279,11 +279,11 @@ class BoardTest {
         pedalRepository.save(pedal5);
 
         //when
-        board.addPedal(pedal1);
-        board.addPedal(pedal2);
-        board.addPedal(pedal3);
-        board.addPedal(pedal4);
-        board.addPedal(pedal5);
+        board.insertPedal(pedal1,0);
+        board.insertPedal(pedal2,1);
+        board.insertPedal(pedal3,2);
+        board.insertPedal(pedal4,3);
+        board.insertPedal(pedal5,4);
 
         board.removePedal(pedal3);
 

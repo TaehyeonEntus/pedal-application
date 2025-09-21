@@ -1,7 +1,10 @@
 package entus.resourceServer.domain.dto.page;
 
 import entus.resourceServer.domain.dto.response.BoardDetailDto;
+import entus.resourceServer.domain.dto.response.CategoryDto;
 import lombok.Data;
+
+import java.util.Set;
 
 @Data
 public class BoardDetailPageDto {

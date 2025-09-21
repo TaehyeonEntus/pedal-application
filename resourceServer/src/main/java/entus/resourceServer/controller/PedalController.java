@@ -1,11 +1,11 @@
 package entus.resourceServer.controller;
 
-import entus.resourceServer.Service.PedalService;
-import entus.resourceServer.Service.R2Service;
-import entus.resourceServer.Service.UserService;
+import entus.resourceServer.Service.*;
+import entus.resourceServer.domain.Board;
 import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.domain.dto.request.AddPedalRequestDto;
 import entus.resourceServer.domain.dto.request.UploadImageSuccessRequestDto;
+import entus.resourceServer.domain.dto.response.AddBoardResponseDto;
 import entus.resourceServer.domain.dto.response.AddPedalResponseDto;
 import entus.resourceServer.domain.dto.response.PresignedUrlResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -19,20 +19,20 @@ import java.util.Map;
 @RequestMapping("/pedal")
 @RequiredArgsConstructor
 public class PedalController {
-    private final UserService userService;
     private final PedalService pedalService;
     private final R2Service r2Service;
+    private final BrandService brandService;
+    private final CategoryService categoryService;
 
     @PostMapping("/add")
     public AddPedalResponseDto addPedal(@RequestBody AddPedalRequestDto dto) {
-        Long pedalId = pedalService.add(Pedal.create(dto.getName(), dto.getDescription(), dto.getBrand(), dto.getCategory()));
-        return new AddPedalResponseDto(pedalId);
+        return new AddPedalResponseDto(pedalService.add(Pedal.create(dto.getName(), dto.getDescription(), brandService.get(dto.getBrandId()), categoryService.get(dto.getCategoryId()))));
     }
 
     @PostMapping("/{pedalId}/upload")
     public PresignedUrlResponseDto uploadPedal(@PathVariable Long pedalId) {
         String objectKey = "pedal_" + pedalId + ".jpg";
-        return new PresignedUrlResponseDto(r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5)),objectKey);
+        return new PresignedUrlResponseDto(r2Service.generatePresignedUploadUrl(objectKey, Duration.ofMinutes(5)), objectKey);
     }
 
     @PostMapping("/{pedalId}/upload/success")

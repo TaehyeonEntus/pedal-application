@@ -38,10 +38,10 @@ public class BoardService {
     }
 
     @Transactional
-    public Board addPedal(long boardId, long pedalId) {
+    public Board insertPedal(long boardId, long pedalId, int index) {
         Board board = this.get(boardId);
         Pedal pedal = pedalService.get(pedalId);
-        board.addPedal(pedal);
+        board.insertPedal(pedal, index);
         return board;
     }
 

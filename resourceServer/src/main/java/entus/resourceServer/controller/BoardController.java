@@ -45,10 +45,9 @@ public class BoardController {
         return new ApiResponse("upload success");
     }
 
-    @PostMapping("/{boardId}/add/{pedalId}")
-    public BoardDetailDto addPedal(@PathVariable Long boardId, @PathVariable Long pedalId) {
-        Board board = boardService.addPedal(boardId, pedalId);
-        return new BoardDetailDto(board);
+    @PostMapping("/{boardId}/insert")
+    public BoardChainDto addPedal(@PathVariable Long boardId, @RequestBody InsertPedalRequestDto dto) {
+        return new BoardChainDto(boardService.insertPedal(boardId, dto.getPedalId(),dto.getIndex()));
     }
 
     @PostMapping("/{boardId}/delete")

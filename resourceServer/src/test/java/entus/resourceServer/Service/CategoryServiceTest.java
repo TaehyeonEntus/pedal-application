@@ -1,27 +1,39 @@
-package entus.resourceServer.controller;
+package entus.resourceServer.Service;
 
-import entus.resourceServer.Service.*;
-import entus.resourceServer.domain.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
+import entus.resourceServer.config.R2Config;
+import entus.resourceServer.domain.Category;
+import entus.resourceServer.domain.dto.response.CategoryDto;
+import entus.resourceServer.repository.CategoryRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
-@Controller
-@RequiredArgsConstructor
-public class TestController {
-    private final UserService userService;
-    private final PedalService pedalService;
-    private final BoardService boardService;
-    private final BrandService brandService;
-    private final CategoryService categoryService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    @GetMapping("/addTestData")
-    @Transactional
-    public String addTestData(Authentication authentication) {
-        User user = userService.get(Long.parseLong((String) authentication.getPrincipal()));
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringBootTest
+class CategoryServiceTest {
+    @Autowired
+    CategoryService categoryService;
+    @Autowired
+    CategoryRepository categoryRepository;
+    @MockitoBean
+    R2Config r2Config;
+    @MockitoBean
+    R2Service r2Service;
+
+    @BeforeEach
+    void setUp() {
         Long category1Id = categoryService.add(Category.create("카테고리1", null));
         Category category1 = categoryService.get(category1Id);
         Long category1_1Id = categoryService.add(Category.create("카테고리1_1", category1));
@@ -38,7 +50,7 @@ public class TestController {
         Long category2_4Id = categoryService.add(Category.create("카테고리2_4", category2));
         Long category2_5Id = categoryService.add(Category.create("카테고리2_5", category2));
 
-        Long category3Id = categoryService.add(Category.create("카테고리3",null));
+        Long category3Id = categoryService.add(Category.create("카테고리3", null));
         Category category3 = categoryService.get(category3Id);
         Long category3_1Id = categoryService.add(Category.create("카테고리3_1", category3));
         Long category3_2Id = categoryService.add(Category.create("카테고리3_2", category3));
@@ -53,24 +65,35 @@ public class TestController {
         Long category4_3Id = categoryService.add(Category.create("카테고리4_3", category4));
         Long category4_4Id = categoryService.add(Category.create("카테고리4_4", category4));
         Long category4_5Id = categoryService.add(Category.create("카테고리4_5", category4));
+    }
 
-        Long brand1Id = brandService.add(Brand.create("브랜드1", "https://123.com"));
-        Long brand2Id = brandService.add(Brand.create("브랜드2", "https://123.com"));
-        Long brand3Id = brandService.add(Brand.create("브랜드3", "https://123.com"));
-        Long brand4Id = brandService.add(Brand.create("브랜드4", "https://123.com"));
+    @AfterEach
+    void tearDown() {
+    }
 
-        Long p1 = pedalService.add(Pedal.create("pedal1", "설명1", brandService.get(brand1Id), categoryService.get(category1_1Id)));
-        Long p2 = pedalService.add(Pedal.create("pedal2", "설명2", brandService.get(brand2Id), categoryService.get(category2_2Id)));
-        Long p3 = pedalService.add(Pedal.create("pedal3", "설명3", brandService.get(brand3Id), categoryService.get(category3_3Id)));
-        Long p4 = pedalService.add(Pedal.create("pedal4", "설명4", brandService.get(brand4Id), categoryService.get(category4_4Id)));
+    @Test
+    @DisplayName("GetRootCategories")
+    @Transactional
+    void GetRootCategories() throws Exception {
+        //given
+        Set<CategoryDto> categoryTree = categoryService.getCategoryTree();
 
-        Long boardId = boardService.add(Board.create(user, "board1", "설명1"));
+        //then
+        assertEquals(categoryTree.size(), 4);
+    }
 
-        boardService.get(boardId).insertPedal(pedalService.get(p1),0);
-        boardService.get(boardId).insertPedal(pedalService.get(p2),1);
-        boardService.get(boardId).insertPedal(pedalService.get(p3),2);
-        boardService.get(boardId).insertPedal(pedalService.get(p4),3);
+    @Test
+    @DisplayName("GetCategoryTree")
+    @Transactional
+    void GetCategoryTree() throws Exception {
+        //given
+        Set<CategoryDto> c_d0 = categoryService.getCategoryTree();
+        Set<CategoryDto> c_d1 = c_d0.stream().flatMap(c -> c.getChildren().stream()).collect(Collectors.toSet());
+        Set<CategoryDto> c_d2 = c_d1.stream().flatMap(c -> c.getChildren().stream()).collect(Collectors.toSet());
 
-        return "redirect:/home";
+        //then
+        assertEquals(c_d0.size(), 4);
+        assertEquals(c_d1.size(), 20);
+        assertEquals(c_d2.size(), 0);
     }
 }

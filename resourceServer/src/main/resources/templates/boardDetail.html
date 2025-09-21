@@ -25,17 +25,17 @@
         }
 
         .card {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
             border: none;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
             width: 100%;
             max-width: 900px;
         }
 
         .card-footer {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 0 0 20px 20px !important;
             border: none;
             padding: 1.5rem;
@@ -57,7 +57,7 @@
         }
 
         .navbar {
-            background: rgba(255,255,255,0.1) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(10px);
             margin-bottom: 2rem;
         }
@@ -69,7 +69,7 @@
 
         .nav-link:hover {
             color: #f8f9fa !important;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
         .btn-primary {
@@ -97,7 +97,7 @@
             height: 200px;
             object-fit: cover;
             border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
 
         .board-img-editable {
@@ -123,9 +123,9 @@
             width: 180px;
             margin: 0 10px;
             text-align: center;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             position: relative;
             user-select: none;
@@ -156,7 +156,7 @@
         .pedal-arrow {
             font-size: 2rem;
             color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             margin: 0 5px;
         }
 
@@ -241,7 +241,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             z-index: 100;
             transition: all 0.3s ease;
             opacity: 0;
@@ -269,11 +269,21 @@
         }
 
         @keyframes shake {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            50% { transform: rotate(0deg); }
-            75% { transform: rotate(-5deg); }
-            100% { transform: rotate(0deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(5deg);
+            }
+            50% {
+                transform: rotate(0deg);
+            }
+            75% {
+                transform: rotate(-5deg);
+            }
+            100% {
+                transform: rotate(0deg);
+            }
         }
 
         .move-target-plus {
@@ -288,7 +298,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             transition: transform 0.3s ease, background 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .move-target-plus:hover {
@@ -370,6 +380,29 @@
     <p>&copy; 2025 Pedal App. Made with ❤️</p>
 </footer>
 
+<div class="modal fade" id="addPedalModal" tabindex="-1" aria-labelledby="addPedalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPedalModalLabel">페달 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalLoading" class="text-center mt-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">카테고리를 불러오는 중...</p>
+                </div>
+                <div id="categoryContainer" class="d-flex flex-wrap gap-2 mb-3" style="display: none;">
+                </div>
+                <div id="pedalListContainer" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mt-3">
+                </div>
+                <div id="paginationContainer" class="d-flex justify-content-center mt-3">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script type="module">
     import { getData, postData } from "/js/api.js";
@@ -386,8 +419,15 @@
     const boardContentEl = document.getElementById('boardContent');
     const boardHeaderControls = document.getElementById('boardHeaderControls');
 
+    const addPedalModal = new bootstrap.Modal(document.getElementById('addPedalModal'));
+    const modalLoading = document.getElementById('modalLoading');
+    const categoryContainer = document.getElementById('categoryContainer');
+    const pedalListContainer = document.getElementById('pedalListContainer');
+    const paginationContainer = document.getElementById('paginationContainer');
+
     let isOwner = false;
     let currentBoardData = null;
+    let selectedInsertionIndex = -1;
 
     window.addEventListener('DOMContentLoaded', async () => {
         const boardId = getBoardIdFromPath();
@@ -405,6 +445,7 @@
                 boardHeaderControls.style.display = 'flex';
                 attachBoardEditListeners(boardId);
                 attachDragDropListeners(boardId);
+                attachAddPedalListeners(); // Attach modal listeners
             }
 
             hideLoadingState();
@@ -508,14 +549,13 @@
             editBtn.style.display = 'none';
             boardEditControls.style.display = 'inline-block';
 
-            // '수정' 모드일 때만 이미지 클릭 이벤트 리스너 추가
             boardImage.addEventListener('click', () => {
                 boardImageInput.click();
             });
         });
 
         saveBtn.addEventListener('click', async () => {
-            showUpdatingState(); // '보드 정보 수정 중...' 표시
+            showUpdatingState();
             const newName = boardNameInput.value;
             const newDescription = boardDescriptionInput.value;
             const imageFile = boardImageInput.files[0];
@@ -542,7 +582,7 @@
         cancelBtn.addEventListener('click', () => {
             boardNameInput.value = currentBoardData.info.boardName;
             boardDescriptionInput.value = currentBoardData.info.boardDescription;
-            boardImage.src = getImageUrl(currentBoardData.info.boardImageUrl); // 미리보기 취소
+            boardImage.src = getImageUrl(currentBoardData.info.boardImageUrl);
             boardNameDisplay.style.display = 'inline-block';
             boardNameInput.style.display = 'none';
             boardDescriptionDisplay.style.display = 'block';
@@ -551,7 +591,6 @@
             boardEditControls.style.display = 'none';
         });
 
-        // 파일 선택 시 미리보기 구현
         boardImageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -583,12 +622,7 @@
             firstAddTarget.innerHTML = `<span class="move-target-plus"><i class="fas fa-plus"></i></span>`;
             firstAddTarget.dataset.moveIndex = 0;
             pedalListEl.appendChild(firstAddTarget);
-
-            firstAddTarget.addEventListener('click', () => {
-                window.location.href = `/add-pedal/${boardId}?index=0`;
-            });
         }
-
 
         pedals.forEach((pedal, index) => {
             const cardDiv = document.createElement('div');
@@ -621,10 +655,6 @@
                 addTarget.innerHTML = `<span class="move-target-plus"><i class="fas fa-plus"></i></span>`;
                 addTarget.dataset.moveIndex = index + 1;
                 pedalListEl.appendChild(addTarget);
-
-                addTarget.addEventListener('click', () => {
-                    window.location.href = `/add-pedal/${boardId}?index=${index + 1}`;
-                });
             } else if (index < pedals.length - 1) {
                 const arrowSpan = document.createElement('span');
                 arrowSpan.className = 'pedal-arrow';
@@ -713,7 +743,6 @@
             trashCanEl.classList.remove('active');
         });
 
-        // 🗑️ 휴지통 관련 드래그앤드롭 이벤트 리스너
         trashCanEl.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
@@ -740,6 +769,149 @@
                 }
             }
         });
+    }
+
+    // Modal and Pedal Selection Logic
+    function attachAddPedalListeners() {
+        document.querySelectorAll('.pedal-move-target').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedInsertionIndex = parseInt(btn.dataset.moveIndex);
+                loadCategoriesAndOpenModal();
+            });
+        });
+    }
+
+    async function loadCategoriesAndOpenModal() {
+        categoryContainer.innerHTML = '';
+        pedalListContainer.innerHTML = '';
+        paginationContainer.innerHTML = '';
+        modalLoading.style.display = 'block';
+
+        addPedalModal.show();
+
+        try {
+            const categories = await getData('/api/categories');
+            renderCategories(categories);
+        } catch (error) {
+            categoryContainer.innerHTML = '<p class="text-danger text-center mt-3">카테고리 로딩 실패</p>';
+        } finally {
+            modalLoading.style.display = 'none';
+            categoryContainer.style.display = 'flex';
+        }
+    }
+
+    function renderCategories(categories) {
+        categories.forEach(category => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-outline-primary btn-sm';
+            btn.textContent = category.categoryName;
+            btn.addEventListener('click', () => {
+                loadPedals(category.categoryId, 0);
+            });
+            categoryContainer.appendChild(btn);
+
+            if (category.children && category.children.length > 0) {
+                // You can implement a dropdown or a sub-category UI here if needed.
+                // For simplicity, we'll just render sub-categories as buttons.
+                renderCategories(category.children);
+            }
+        });
+    }
+
+    async function loadPedals(categoryId, page = 0) {
+        pedalListContainer.innerHTML = '';
+        paginationContainer.innerHTML = '';
+        modalLoading.style.display = 'block';
+
+        try {
+            const response = await getData(`/api/pedals/category/${categoryId}?page=${page}`);
+
+            if (response.pedals.length === 0) {
+                pedalListContainer.innerHTML = '<p class="text-muted text-center mt-4">해당 카테고리에 페달이 없습니다.</p>';
+            } else {
+                renderPedalSelection(response.pedals);
+                renderPagination(response.totalPage, response.currentPage, categoryId);
+            }
+        } catch (error) {
+            pedalListContainer.innerHTML = '<p class="text-danger text-center mt-4">페달 로딩 실패</p>';
+        } finally {
+            modalLoading.style.display = 'none';
+        }
+    }
+
+    function renderPedalSelection(pedals) {
+        pedals.forEach(pedal => {
+            const pedalCard = document.createElement('div');
+            pedalCard.className = 'col';
+            pedalCard.innerHTML = `
+                <div class="card h-100 shadow-sm pedal-select-card" data-pedal-id="${pedal.pedalId}">
+                    <img src="${getImageUrl(pedal.pedalImageUrl)}" class="card-img-top" alt="${pedal.pedalName}">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">${pedal.pedalName}</h6>
+                        <small class="text-muted">${pedal.categoryName || ''}</small>
+                    </div>
+                </div>
+            `;
+            pedalListContainer.appendChild(pedalCard);
+
+            pedalCard.addEventListener('click', () => {
+                insertPedal(pedal.pedalId);
+            });
+        });
+    }
+
+    function renderPagination(totalPage, currentPage, categoryId) {
+        const ul = document.createElement('ul');
+        ul.className = 'pagination';
+
+        // Previous button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 0 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">이전</a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 0) loadPedals(categoryId, currentPage - 1);
+        });
+        ul.appendChild(prevLi);
+
+        // Page number buttons
+        for (let i = 0; i < totalPage; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i + 1}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadPedals(categoryId, i);
+            });
+            ul.appendChild(li);
+        }
+
+        // Next button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPage - 1 ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">다음</a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < totalPage - 1) loadPedals(categoryId, currentPage + 1);
+        });
+        ul.appendChild(nextLi);
+
+        paginationContainer.appendChild(ul);
+    }
+
+    async function insertPedal(pedalId) {
+        const boardId = getBoardIdFromPath();
+        const dto = { pedalId: pedalId, index: selectedInsertionIndex };
+
+        try {
+            const response = await postData(`/board/${boardId}/insert`, dto);
+            renderPedalList(response.chain.pedals); // Re-render the pedal chain
+            alert('페달이 보드에 추가되었습니다!');
+            addPedalModal.hide();
+        } catch (error) {
+            console.error("페달 추가 실패:", error);
+            alert('페달 추가에 실패했습니다.');
+        }
     }
 </script>
 </body>

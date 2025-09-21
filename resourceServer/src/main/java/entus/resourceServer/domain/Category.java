@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 카테고리의 계층은 layer 하나로 구현하되 부모, 자식의 여부로 알 수 있음
@@ -30,7 +33,7 @@ public class Category extends BaseEntity {
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
-    private List<Category> children = new ArrayList<>();
+    private Set<Category> children = new HashSet<>();
 
 
     protected Category(String name, Category parent) {

@@ -1,6 +1,7 @@
 package entus.resourceServer.controller;
 
 import entus.resourceServer.Service.BoardService;
+import entus.resourceServer.Service.CategoryService;
 import entus.resourceServer.Service.PedalService;
 import entus.resourceServer.Service.UserService;
 import entus.resourceServer.domain.Board;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RequestMapping("/api")
 @RestController
@@ -23,7 +25,7 @@ import java.util.List;
 public class ApiController {
     private final BoardService boardService;
     private final PedalService pedalService;
-    private final UserService userService;
+    private final CategoryService categoryService;
 
     @GetMapping("/check")
     public ApiResponse check() {
@@ -68,6 +70,23 @@ public class ApiController {
                         .stream()
                         .map(PedalListDto::new)
                         .toList());
+    }
+
+    @GetMapping("/pedals/category/{categoryId}")
+    public PedalListPageDto apiPedalCategory(@PathVariable long categoryId, @RequestParam(defaultValue = "0") int page) {
+        Page<Pedal> pedals = pedalService.getAllByCategory(categoryService.get(categoryId), PageRequest.of(page, 20, Sort.by("id").ascending()));
+        return new PedalListPageDto(
+                pedals.getTotalPages(),
+                pedals.getNumber(),
+                pedals
+                        .stream()
+                        .map(PedalListDto::new)
+                        .toList());
+    }
+
+    @GetMapping("/categories")
+    public Set<CategoryDto> apiCategories() {
+        return categoryService.getCategoryTree();
     }
 
     @GetMapping("/board/{boardId}")
