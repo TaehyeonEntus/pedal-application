@@ -509,6 +509,7 @@
         cancelBtn.addEventListener('click', () => {
             boardNameInput.value = currentBoardData.info.boardName;
             boardDescriptionInput.value = currentBoardData.info.boardDescription;
+            boardImage.src = getImageUrl(currentBoardData.info.boardImageUrl); // 미리보기 취소
             boardNameDisplay.style.display = 'inline-block';
             boardNameInput.style.display = 'none';
             boardDescriptionDisplay.style.display = 'block';
@@ -517,11 +518,22 @@
             boardEditControls.style.display = 'none';
         });
 
-        if (boardImage) {
-            boardImage.addEventListener('click', () => {
-                boardImageInput.click();
-            });
-        }
+        // 수정 모드일 때만 이미지 클릭 리스너 등록
+        boardImage.addEventListener('click', () => {
+            boardImageInput.click();
+        });
+
+        // 파일 선택 시 미리보기 구현
+        boardImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    boardImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
 
     function renderPedalList(pedals) {
