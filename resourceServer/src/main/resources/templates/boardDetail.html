@@ -229,7 +229,6 @@
         }
 
         .trash-can-container {
-            display: none;
             position: fixed;
             bottom: 2rem;
             right: 2rem;
@@ -237,7 +236,7 @@
             border-radius: 50%;
             width: 60px;
             height: 60px;
-            display: flex;
+            display: none; /* 드래그 시작 전에는 숨기도록 변경 */
             align-items: center;
             justify-content: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -248,12 +247,7 @@
 
         .trash-can-container.active {
             opacity: 1;
-        }
-
-        .trash-can-container:not(.active) {
-            opacity: 0;
-            transform: scale(0.8);
-            pointer-events: none;
+            display: flex;
         }
 
         .trash-can-icon {
@@ -319,8 +313,8 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="fas fa-info-circle me-2"></i>보드 상세 정보</span>
-            <div id="boardHeaderControls">
-                <button id="editBoardBtn" class="btn btn-primary btn-sm" style="display:none;"><i class="fas fa-edit me-1"></i>수정</button>
+            <div id="boardHeaderControls" style="display:none;">
+                <button id="editBoardBtn" class="btn btn-primary btn-sm"><i class="fas fa-edit me-1"></i>수정</button>
                 <div id="boardEditControls" class="d-inline-block" style="display:none;">
                     <button id="saveBoardBtn" class="btn btn-success btn-sm me-2"><i class="fas fa-check me-1"></i>저장</button>
                     <button id="cancelBoardBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times me-1"></i>취소</button>
@@ -395,7 +389,6 @@
 
             if (isOwner) {
                 boardHeaderControls.style.display = 'flex';
-                document.getElementById('editBoardBtn').style.display = 'inline-block';
                 attachBoardEditListeners(boardId);
                 attachDragDropListeners(boardId);
             }
@@ -477,9 +470,9 @@
         const boardDescriptionDisplay = document.getElementById('boardDescriptionDisplay');
         const boardDescriptionInput = document.getElementById('boardDescriptionInput');
 
-        // Initial state
-        boardEditControls.style.display = 'none';
+        // 초기 상태 명시적 설정
         editBtn.style.display = 'inline-block';
+        boardEditControls.style.display = 'none';
 
         editBtn.addEventListener('click', () => {
             boardNameDisplay.style.display = 'none';
@@ -503,7 +496,7 @@
                 }
 
                 const updateData = { name: newName, description: newDescription };
-                await postData(`/board/${boardId}/id`, updateData); // Path changed for logical consistency
+                await postData(`/board/${boardId}/update`, updateData);
 
                 alert('보드가 성공적으로 수정되었습니다.');
                 window.location.reload();
@@ -680,9 +673,10 @@
             trashCanEl.classList.remove('active');
         });
 
+        // 🗑️ 휴지통 관련 드래그앤드롭 이벤트 리스너
         trashCanEl.addEventListener('dragover', (e) => {
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
+            e.dataTransfer.dropEffect = 'move';
             trashCanEl.classList.add('drag-over');
         });
 
@@ -705,9 +699,6 @@
                     alert('삭제에 실패했습니다.');
                 }
             }
-            // Ensure the trash can is hidden after any drop
-            trashCanEl.classList.remove('active');
-            pedalListEl.dispatchEvent(new Event('dragend'));
         });
     }
 </script>
