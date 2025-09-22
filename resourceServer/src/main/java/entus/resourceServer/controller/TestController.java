@@ -54,6 +54,8 @@ public class TestController {
         Long category4_4Id = categoryService.add(Category.create("카테고리4_4", category4));
         Long category4_5Id = categoryService.add(Category.create("카테고리4_5", category4));
 
+        Long category5Id = categoryService.add(Category.create("기타", null));
+
         Long brand1Id = brandService.add(Brand.create("브랜드1", "https://123.com"));
         Long brand2Id = brandService.add(Brand.create("브랜드2", "https://123.com"));
         Long brand3Id = brandService.add(Brand.create("브랜드3", "https://123.com"));
