@@ -426,6 +426,7 @@
 
         renderBoardInfo() {
             const info = this.currentBoardData.info;
+            this.toggleEditMode(false);
             this.elements.boardContent.innerHTML = `
                 <img id="boardImage" alt="Board Image"
                      class="board-img ${this.isOwner ? 'editable' : ''} mb-3 me-md-4"
