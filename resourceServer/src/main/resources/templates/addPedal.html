@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>페달 추가</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 기존 addBoard 스타일 그대로 재사용 가능 */
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; flex-direction: column; }
+        .container-main { flex: 1; display: flex; justify-content: center; align-items: center; padding: 2rem 0; flex-direction: column; }
+        .card { background: rgba(255, 255, 255, 0.95); border: none; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); margin-bottom: 2rem; width: 100%; max-width: 700px; }
+        .card-header { background: linear-gradient(45deg, #667eea, #764ba2); color: white; border-radius: 20px 20px 0 0 !important; border: none; padding: 1.5rem; text-align: center; font-weight: bold; }
+        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); border: none; border-radius: 50px; padding: 10px 25px; font-weight: 500; box-shadow: 0 4px 15px rgba(102,126,234,0.3); transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .loading-spinner, .error-message { text-align: center; margin: 2rem 0; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/home"><i class="fas fa-music me-2"></i>Pedal App</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/home"><i class="fas fa-home me-1"></i>Home</a>
+            <a class="nav-link" href="/boards"><i class="fas fa-th-large me-1"></i>Pedal Boards</a>
+            <a class="nav-link" href="/pedals"><i class="fas fa-sliders-h me-1"></i>Effect Pedals</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container container-main">
+    <section class="card">
+        <div class="card-header"><i class="fas fa-plus-circle me-2"></i>페달 추가</div>
+        <div class="card-body">
+            <form id="addPedalForm">
+                <div class="mb-3">
+                    <label for="name" class="form-label">페달 이름</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">페달 설명</label>
+                    <textarea class="form-control" id="description" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">카테고리</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="selectedCategory" placeholder="카테고리 선택" readonly>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#categoryModal">선택</button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">브랜드</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="selectedBrand" placeholder="브랜드 선택" readonly>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#brandModal">선택</button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">페달 이미지 (선택)</label>
+                    <input type="file" class="form-control" id="image" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-2"></i>페달 생성하기</button>
+            </form>
+
+            <div id="loading" class="loading-spinner" style="display:none;">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">페달 생성 중...</p>
+            </div>
+            <div id="error" class="error-message text-danger" style="display:none;"></div>
+        </div>
+    </section>
+</div>
+
+<!-- Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">카테고리 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="categoryTreeContainer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Brand Modal -->
+<div class="modal fade" id="brandModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">브랜드 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="brandListContainer"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="brandPrevPage">이전</button>
+                <button type="button" class="btn btn-secondary" id="brandNextPage">다음</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2025 Pedal App. Made with ❤️</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+    import { getData, postData } from "/js/api.js";
+
+    const form = document.getElementById("addPedalForm");
+    const loadingEl = document.getElementById("loading");
+    const errorEl = document.getElementById("error");
+    const imageInput = document.getElementById("image");
+
+    let selectedCategoryId = null;
+    let selectedBrandId = null;
+    let brandPage = 0;
+
+    // 카테고리 트리
+    async function loadCategoryTree() {
+        const categories = await getData("/categories");
+        const container = document.getElementById("categoryTreeContainer");
+        container.innerHTML = renderCategoryTree(categories);
+    }
+    function renderCategoryTree(categories) {
+        let html = '<ul class="list-group">';
+        categories.forEach(cat => {
+            html += `<li class="list-group-item" onclick="selectCategory(${cat.categoryId}, '${cat.categoryName}')">${cat.categoryName}`;
+            if (cat.children && cat.children.length > 0) html += renderCategoryTree(cat.children);
+            html += '</li>';
+        });
+        html += '</ul>';
+        return html;
+    }
+    window.selectCategory = (id, name) => {
+        selectedCategoryId = id;
+        document.getElementById("selectedCategory").value = name;
+        bootstrap.Modal.getInstance(document.getElementById("categoryModal")).hide();
+    }
+
+    // 브랜드 리스트
+    async function loadBrands(page = 0) {
+        const data = await getData(`/brands?page=${page}`);
+        const container = document.getElementById("brandListContainer");
+        container.innerHTML = '';
+        data.brands.forEach(b => {
+            const li = document.createElement('li');
+            li.classList.add('list-group-item');
+            li.textContent = b.brandName;
+            li.onclick = () => selectBrand(b.brandId, b.brandName);
+            container.appendChild(li);
+        });
+    }
+    window.selectBrand = (id, name) => {
+        selectedBrandId = id;
+        document.getElementById("selectedBrand").value = name;
+        bootstrap.Modal.getInstance(document.getElementById("brandModal")).hide();
+    }
+    document.getElementById("brandPrevPage").onclick = () => { if (brandPage>0) brandPage--; loadBrands(brandPage); }
+    document.getElementById("brandNextPage").onclick = () => { brandPage++; loadBrands(brandPage); }
+
+    // 폼 제출
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
+        form.style.display = "none";
+        loadingEl.style.display = "block";
+        errorEl.style.display = "none";
+
+        const name = document.getElementById("name").value;
+        const description = document.getElementById("description").value;
+        const imageFile = imageInput.files[0];
+
+        if (!selectedCategoryId || !selectedBrandId) {
+            alert("카테고리와 브랜드를 선택해주세요.");
+            form.style.display = "block";
+            loadingEl.style.display = "none";
+            return;
+        }
+
+        try {
+            const {pedalId} = await postData("/pedal/add", {name, description, brandId: selectedBrandId, categoryId: selectedCategoryId});
+            if (imageFile) {
+                const {uploadUrl, objectKey} = await postData(`/pedal/${pedalId}/upload`);
+                await fetch(uploadUrl, {method:"PUT", body:imageFile, headers: {"Content-Type": imageFile.type}});
+                await postData(`/pedal/${pedalId}/upload/success`, {objectKey});
+            }
+            window.location.href = `/pedal/${pedalId}`;
+        } catch(err) {
+            console.error("페달 추가 실패:", err);
+            errorEl.textContent = err.message || "페달 생성 중 오류가 발생했습니다.";
+            errorEl.style.display = "block";
+            loadingEl.style.display = "none";
+            form.style.display = "block";
+        }
+    });
+
+    loadCategoryTree();
+    loadBrands();
+</script>
+</body>
+</html>

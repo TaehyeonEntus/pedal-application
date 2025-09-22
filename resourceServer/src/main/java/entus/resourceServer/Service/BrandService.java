@@ -3,6 +3,8 @@ package entus.resourceServer.Service;
 import entus.resourceServer.domain.Brand;
 import entus.resourceServer.repository.BrandRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +22,7 @@ public class BrandService {
         return brandRepository.save(brand).getId();
     }
 
-    public List<Brand> getAll(){
-        return brandRepository.findAll();
+    public Page<Brand> getAll(Pageable pageable){
+        return brandRepository.findAll(pageable);
     }
 }

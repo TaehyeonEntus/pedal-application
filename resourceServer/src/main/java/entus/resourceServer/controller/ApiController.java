@@ -1,10 +1,8 @@
 package entus.resourceServer.controller;
 
-import entus.resourceServer.Service.BoardService;
-import entus.resourceServer.Service.CategoryService;
-import entus.resourceServer.Service.PedalService;
-import entus.resourceServer.Service.UserService;
+import entus.resourceServer.Service.*;
 import entus.resourceServer.domain.Board;
+import entus.resourceServer.domain.Brand;
 import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.domain.User;
 import entus.resourceServer.domain.dto.page.*;
@@ -26,6 +24,7 @@ public class ApiController {
     private final BoardService boardService;
     private final PedalService pedalService;
     private final CategoryService categoryService;
+    private final BrandService brandService;
 
     @GetMapping("/check")
     public ApiResponse check() {
@@ -81,6 +80,18 @@ public class ApiController {
                 pedals
                         .stream()
                         .map(PedalListDto::new)
+                        .toList());
+    }
+
+    @GetMapping("/brands")
+    public BrandListPageDto apiBrandList(@RequestParam(defaultValue = "0") int page) {
+        Page<Brand> brands = brandService.getAll(PageRequest.of(page, 20, Sort.by("id").ascending()));
+        return new BrandListPageDto(
+                brands.getTotalPages(),
+                brands.getNumber(),
+                brands
+                        .stream()
+                        .map(BrandListDto::new)
                         .toList());
     }
 

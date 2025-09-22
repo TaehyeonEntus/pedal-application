@@ -1,11 +1,12 @@
 package entus.resourceServer.controller;
 
-import entus.resourceServer.Service.*;
-import entus.resourceServer.domain.Board;
+import entus.resourceServer.Service.BrandService;
+import entus.resourceServer.Service.CategoryService;
+import entus.resourceServer.Service.PedalService;
+import entus.resourceServer.Service.R2Service;
 import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.domain.dto.request.AddPedalRequestDto;
 import entus.resourceServer.domain.dto.request.UploadImageSuccessRequestDto;
-import entus.resourceServer.domain.dto.response.AddBoardResponseDto;
 import entus.resourceServer.domain.dto.response.AddPedalResponseDto;
 import entus.resourceServer.domain.dto.response.PresignedUrlResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/pedal")
