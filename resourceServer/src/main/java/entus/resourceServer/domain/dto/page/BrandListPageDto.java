@@ -9,11 +9,11 @@ import java.util.List;
 public class BrandListPageDto {
     private int totalPage;
     private int currentPage;
-    private List<BrandListDto> pedals;
+    private List<BrandListDto> brands;
 
-    public BrandListPageDto(int totalPage, int currentPage, List<BrandListDto> pedals) {
+    public BrandListPageDto(int totalPage, int currentPage, List<BrandListDto> brands) {
         this.totalPage = totalPage;
         this.currentPage = currentPage;
-        this.pedals = pedals;
+        this.brands = brands;
     }
 }

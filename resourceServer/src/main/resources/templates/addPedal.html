@@ -6,21 +6,175 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* 기존 addBoard 스타일 그대로 재사용 가능 */
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; flex-direction: column; }
-        .container-main { flex: 1; display: flex; justify-content: center; align-items: center; padding: 2rem 0; flex-direction: column; }
-        .card { background: rgba(255, 255, 255, 0.95); border: none; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); margin-bottom: 2rem; width: 100%; max-width: 700px; }
-        .card-header { background: linear-gradient(45deg, #667eea, #764ba2); color: white; border-radius: 20px 20px 0 0 !important; border: none; padding: 1.5rem; text-align: center; font-weight: bold; }
-        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); border: none; border-radius: 50px; padding: 10px 25px; font-weight: 500; box-shadow: 0 4px 15px rgba(102,126,234,0.3); transition: all 0.3s ease; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
-        .loading-spinner, .error-message { text-align: center; margin: 2rem 0; }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container-main {
+            padding: 2rem 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            border: none;
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .navbar-brand, .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: #f8f9fa !important;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            background: rgba(102, 126, 234, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .image-upload-area:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #764ba2;
+        }
+
+        .image-upload-area.dragover {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 1rem 0;
+        }
+
+        .category-tree {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .category-item {
+            cursor: pointer;
+            padding: 0.5rem;
+            margin: 0.2rem 0;
+            border-radius: 5px;
+            transition: background 0.2s ease;
+        }
+
+        .category-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .category-item.disabled {
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .category-item.disabled:hover {
+            background: none;
+        }
+
+        .category-item.selectable {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .brand-item {
+            cursor: pointer;
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            transition: all 0.2s ease;
+        }
+
+        .brand-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand" href="/home"><i class="fas fa-music me-2"></i>Pedal App</a>
+        <a class="navbar-brand" href="/home">
+            <i class="fas fa-music me-2"></i>Pedal App
+        </a>
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="/home"><i class="fas fa-home me-1"></i>Home</a>
             <a class="nav-link" href="/boards"><i class="fas fa-th-large me-1"></i>Pedal Boards</a>
@@ -30,177 +184,441 @@
 </nav>
 
 <div class="container container-main">
-    <section class="card">
-        <div class="card-header"><i class="fas fa-plus-circle me-2"></i>페달 추가</div>
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-plus-circle me-2"></i>페달 추가
+        </div>
         <div class="card-body">
             <form id="addPedalForm">
                 <div class="mb-3">
-                    <label for="name" class="form-label">페달 이름</label>
+                    <label for="name" class="form-label">페달 이름 *</label>
                     <input type="text" class="form-control" id="name" required>
                 </div>
+
                 <div class="mb-3">
                     <label for="description" class="form-label">페달 설명</label>
-                    <textarea class="form-control" id="description" rows="3"></textarea>
+                    <textarea class="form-control" id="description" rows="3" placeholder="페달에 대한 설명을 입력해주세요..."></textarea>
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">카테고리</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="selectedCategory" placeholder="카테고리 선택" readonly>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#categoryModal">선택</button>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">브랜드</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="selectedBrand" placeholder="브랜드 선택" readonly>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#brandModal">선택</button>
+                    <label class="form-label">카테고리 *</label>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button"
+                                id="categoryDropdown" data-bs-toggle="dropdown">
+                            카테고리를 선택하세요
+                        </button>
+                        <ul class="dropdown-menu w-100 category-tree" id="categoryDropdownMenu">
+                        </ul>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">페달 이미지 (선택)</label>
-                    <input type="file" class="form-control" id="image" accept="image/*">
+                    <label class="form-label">브랜드 *</label>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button"
+                                id="brandDropdown" data-bs-toggle="dropdown">
+                            브랜드를 선택하세요
+                        </button>
+                        <div class="dropdown-menu w-100 p-3" id="brandDropdownMenu" style="min-width: 300px;">
+                            <div id="brandLoading" class="text-center">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                <small class="d-block mt-1">브랜드 로딩중...</small>
+                            </div>
+                            <div id="brandList" style="display: none;">
+                                <div id="brandContainer"></div>
+                                <div id="brandPagination" class="d-flex justify-content-center mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-2"></i>페달 생성하기</button>
+                <div class="mb-3">
+                    <label class="form-label">페달 이미지</label>
+                    <div id="imageUploadArea" class="image-upload-area">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
+                        <p class="text-muted mb-2">이미지를 드래그하여 업로드하거나 클릭하여 선택하세요</p>
+                        <small class="text-muted">JPG, PNG, GIF 파일만 지원됩니다</small>
+                        <input type="file" id="imageInput" class="d-none" accept="image/*">
+                    </div>
+                    <div id="imagePreviewContainer" class="mt-3" style="display: none;">
+                        <div class="image-container">
+                            <img id="imagePreview" class="image-preview" alt="미리보기">
+                            <button type="button" class="remove-image-btn" id="removeImageBtn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-save me-2"></i>페달 생성하기
+                </button>
             </form>
 
             <div id="loading" class="loading-spinner" style="display:none;">
                 <div class="spinner-border text-primary" role="status"></div>
                 <p class="mt-2 text-muted">페달 생성 중...</p>
             </div>
-            <div id="error" class="error-message text-danger" style="display:none;"></div>
-        </div>
-    </section>
-</div>
-
-<!-- Category Modal -->
-<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">카테고리 선택</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="categoryTreeContainer"></div>
+            <div id="error" class="alert alert-danger" style="display:none;"></div>
         </div>
     </div>
 </div>
-
-<!-- Brand Modal -->
-<div class="modal fade" id="brandModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">브랜드 선택</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="brandListContainer"></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="brandPrevPage">이전</button>
-                <button type="button" class="btn btn-secondary" id="brandNextPage">다음</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<footer>
-    <p>&copy; 2025 Pedal App. Made with ❤️</p>
-</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script type="module">
     import { getData, postData } from "/js/api.js";
+    import { getImageUrl } from "/js/getImageUrl.js";
 
-    const form = document.getElementById("addPedalForm");
-    const loadingEl = document.getElementById("loading");
-    const errorEl = document.getElementById("error");
-    const imageInput = document.getElementById("image");
+    class AddPedalManager {
+        constructor() {
+            this.selectedCategoryId = null;
+            this.selectedBrandId = null;
+            this.currentBrandPage = 0;
+            this.totalBrandPages = 0;
+            this.selectedImage = null;
 
-    let selectedCategoryId = null;
-    let selectedBrandId = null;
-    let brandPage = 0;
+            this.elements = {
+                form: document.getElementById('addPedalForm'),
+                loading: document.getElementById('loading'),
+                error: document.getElementById('error'),
+                categoryDropdown: document.getElementById('categoryDropdown'),
+                categoryDropdownMenu: document.getElementById('categoryDropdownMenu'),
+                brandDropdown: document.getElementById('brandDropdown'),
+                brandDropdownMenu: document.getElementById('brandDropdownMenu'),
+                brandLoading: document.getElementById('brandLoading'),
+                brandList: document.getElementById('brandList'),
+                brandContainer: document.getElementById('brandContainer'),
+                brandPagination: document.getElementById('brandPagination'),
+                imageUploadArea: document.getElementById('imageUploadArea'),
+                imageInput: document.getElementById('imageInput'),
+                imagePreviewContainer: document.getElementById('imagePreviewContainer'),
+                imagePreview: document.getElementById('imagePreview'),
+                removeImageBtn: document.getElementById('removeImageBtn')
+            };
 
-    // 카테고리 트리
-    async function loadCategoryTree() {
-        const categories = await getData("/api/categories");
-        const container = document.getElementById("categoryTreeContainer");
-        container.innerHTML = renderCategoryTree(categories);
-    }
-    function renderCategoryTree(categories) {
-        let html = '<ul class="list-group">';
-        categories.forEach(cat => {
-            html += `<li class="list-group-item" onclick="selectCategory(${cat.categoryId}, '${cat.categoryName}')">${cat.categoryName}`;
-            if (cat.children && cat.children.length > 0) html += renderCategoryTree(cat.children);
-            html += '</li>';
-        });
-        html += '</ul>';
-        return html;
-    }
-    window.selectCategory = (id, name) => {
-        selectedCategoryId = id;
-        document.getElementById("selectedCategory").value = name;
-        bootstrap.Modal.getInstance(document.getElementById("categoryModal")).hide();
-    }
-
-    // 브랜드 리스트
-    async function loadBrands(page = 0) {
-        const data = await getData(`/api/brands?page=${page}`);
-        const container = document.getElementById("brandListContainer");
-        container.innerHTML = '';
-        data.brands.forEach(b => {
-            const li = document.createElement('li');
-            li.classList.add('list-group-item');
-            li.textContent = b.brandName;
-            li.onclick = () => selectBrand(b.brandId, b.brandName);
-            container.appendChild(li);
-        });
-    }
-    window.selectBrand = (id, name) => {
-        selectedBrandId = id;
-        document.getElementById("selectedBrand").value = name;
-        bootstrap.Modal.getInstance(document.getElementById("brandModal")).hide();
-    }
-    document.getElementById("brandPrevPage").onclick = () => { if (brandPage>0) brandPage--; loadBrands(brandPage); }
-    document.getElementById("brandNextPage").onclick = () => { brandPage++; loadBrands(brandPage); }
-
-    // 폼 제출
-    form.addEventListener("submit", async e => {
-        e.preventDefault();
-        form.style.display = "none";
-        loadingEl.style.display = "block";
-        errorEl.style.display = "none";
-
-        const name = document.getElementById("name").value;
-        const description = document.getElementById("description").value;
-        const imageFile = imageInput.files[0];
-
-        if (!selectedCategoryId || !selectedBrandId) {
-            alert("카테고리와 브랜드를 선택해주세요.");
-            form.style.display = "block";
-            loadingEl.style.display = "none";
-            return;
+            this.init();
         }
 
-        try {
-            const {pedalId} = await postData("/pedal/add", {name, description, brandId: selectedBrandId, categoryId: selectedCategoryId});
-            if (imageFile) {
-                const {uploadUrl, objectKey} = await postData(`/pedal/${pedalId}/upload`);
-                await fetch(uploadUrl, {method:"PUT", body:imageFile, headers: {"Content-Type": imageFile.type}});
-                await postData(`/pedal/${pedalId}/upload/success`, {objectKey});
+        async init() {
+            this.setupImageUpload();
+            this.setupFormSubmission();
+            await this.loadCategories();
+            this.setupBrandDropdown();
+        }
+
+        setupImageUpload() {
+            // 클릭으로 파일 선택
+            this.elements.imageUploadArea.addEventListener('click', () => {
+                this.elements.imageInput.click();
+            });
+
+            // 파일 선택 시 미리보기
+            this.elements.imageInput.addEventListener('change', (e) => {
+                this.handleFileSelect(e.target.files[0]);
+            });
+
+            // 드래그 앤 드롭
+            this.elements.imageUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                this.elements.imageUploadArea.classList.add('dragover');
+            });
+
+            this.elements.imageUploadArea.addEventListener('dragleave', () => {
+                this.elements.imageUploadArea.classList.remove('dragover');
+            });
+
+            this.elements.imageUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                this.elements.imageUploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleFileSelect(files[0]);
+                }
+            });
+
+            // 이미지 제거
+            this.elements.removeImageBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.removeImage();
+            });
+        }
+
+        handleFileSelect(file) {
+            if (!file) return;
+
+            // 파일 타입 검사
+            if (!file.type.startsWith('image/')) {
+                alert('이미지 파일만 업로드할 수 있습니다.');
+                return;
             }
-            window.location.href = `/pedal/${pedalId}`;
-        } catch(err) {
-            console.error("페달 추가 실패:", err);
-            errorEl.textContent = err.message || "페달 생성 중 오류가 발생했습니다.";
-            errorEl.style.display = "block";
-            loadingEl.style.display = "none";
-            form.style.display = "block";
-        }
-    });
 
-    loadCategoryTree();
-    loadBrands();
+            // 파일 크기 검사 (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기는 5MB 이하여야 합니다.');
+                return;
+            }
+
+            this.selectedImage = file;
+            this.showImagePreview(file);
+        }
+
+        showImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.elements.imagePreview.src = e.target.result;
+                this.elements.imagePreviewContainer.style.display = 'block';
+                this.elements.imageUploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        removeImage() {
+            this.selectedImage = null;
+            this.elements.imageInput.value = '';
+            this.elements.imagePreviewContainer.style.display = 'none';
+            this.elements.imageUploadArea.style.display = 'block';
+        }
+
+        async loadCategories() {
+            try {
+                const categories = await getData('/api/categories');
+                this.renderCategories(categories);
+            } catch (error) {
+                console.error('카테고리 로딩 실패:', error);
+                this.elements.categoryDropdownMenu.innerHTML = '<li><span class="dropdown-item-text text-danger">카테고리 로딩 실패</span></li>';
+            }
+        }
+
+        renderCategories(categories) {
+            this.elements.categoryDropdownMenu.innerHTML = '';
+            categories.forEach(category => {
+                this.createCategoryMenuItem(category, this.elements.categoryDropdownMenu);
+            });
+        }
+
+        createCategoryMenuItem(category, parentElement, level = 0) {
+            const li = document.createElement('li');
+            const hasChildren = category.children && category.children.length > 0;
+
+            if (hasChildren) {
+                // 자식이 있는 경우 - 선택 불가능
+                li.innerHTML = `
+                    <div class="dropdown-item-text category-item disabled" style="padding-left: ${level * 20}px;">
+                        <i class="fas fa-folder me-2"></i>${category.categoryName}
+                    </div>
+                `;
+                parentElement.appendChild(li);
+
+                // 하위 카테고리들 추가
+                category.children.forEach(child => {
+                    this.createCategoryMenuItem(child, parentElement, level + 1);
+                });
+            } else {
+                // 리프 노드 - 선택 가능
+                li.innerHTML = `
+                    <button class="dropdown-item category-item selectable" style="padding-left: ${level * 20}px;"
+                            data-category-id="${category.categoryId}">
+                        <i class="fas fa-tag me-2"></i>${category.categoryName}
+                    </button>
+                `;
+
+                li.addEventListener('click', () => {
+                    this.selectCategory(category.categoryId, category.categoryName);
+                });
+
+                parentElement.appendChild(li);
+            }
+        }
+
+        selectCategory(categoryId, categoryName) {
+            this.selectedCategoryId = categoryId;
+            this.elements.categoryDropdown.textContent = categoryName;
+
+            // 드롭다운 닫기
+            const dropdown = bootstrap.Dropdown.getInstance(this.elements.categoryDropdown);
+            if (dropdown) dropdown.hide();
+        }
+
+        setupBrandDropdown() {
+            this.elements.brandDropdown.addEventListener('shown.bs.dropdown', () => {
+                if (this.elements.brandContainer.innerHTML === '') {
+                    this.loadBrands(0);
+                }
+            });
+        }
+
+        async loadBrands(page = 0) {
+            this.elements.brandLoading.style.display = 'block';
+            this.elements.brandList.style.display = 'none';
+
+            try {
+                const response = await getData(`/api/brands?page=${page}`);
+                this.currentBrandPage = page;
+                this.totalBrandPages = response.totalPage || 1;
+                this.renderBrands(response.brands);
+                this.renderBrandPagination();
+            } catch (error) {
+                console.error('브랜드 로딩 실패:', error);
+                this.elements.brandContainer.innerHTML = '<p class="text-danger text-center">브랜드 로딩 실패</p>';
+            } finally {
+                this.elements.brandLoading.style.display = 'none';
+                this.elements.brandList.style.display = 'block';
+            }
+        }
+
+        renderBrands(brands) {
+            this.elements.brandContainer.innerHTML = '';
+
+            if (brands.length === 0) {
+                this.elements.brandContainer.innerHTML = '<p class="text-muted text-center">브랜드가 없습니다.</p>';
+                return;
+            }
+
+            brands.forEach(brand => {
+                const div = document.createElement('div');
+                div.className = 'brand-item';
+                div.innerHTML = `
+                    <div class="fw-bold">${brand.brandName}</div>
+                    ${brand.description ? `<small class="text-muted">${brand.description}</small>` : ''}
+                `;
+                div.addEventListener('click', () => {
+                    this.selectBrand(brand.brandId, brand.brandName);
+                });
+                this.elements.brandContainer.appendChild(div);
+            });
+        }
+
+        renderBrandPagination() {
+            if (this.totalBrandPages <= 1) {
+                this.elements.brandPagination.innerHTML = '';
+                return;
+            }
+
+            const nav = document.createElement('nav');
+            nav.innerHTML = `
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item ${this.currentBrandPage === 0 ? 'disabled' : ''}">
+                        <button class="page-link" type="button" ${this.currentBrandPage > 0 ? `data-page="${this.currentBrandPage - 1}"` : ''}>‹</button>
+                    </li>
+                    ${Array.from({length: this.totalBrandPages}, (_, i) => `
+                        <li class="page-item ${i === this.currentBrandPage ? 'active' : ''}">
+                            <button class="page-link" type="button" data-page="${i}">${i + 1}</button>
+                        </li>
+                    `).join('')}
+                    <li class="page-item ${this.currentBrandPage === this.totalBrandPages - 1 ? 'disabled' : ''}">
+                        <button class="page-link" type="button" ${this.currentBrandPage < this.totalBrandPages - 1 ? `data-page="${this.currentBrandPage + 1}"` : ''}>›</button>
+                    </li>
+                </ul>
+            `;
+
+            nav.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = e.target.dataset.page;
+                if (page !== undefined) {
+                    this.loadBrands(parseInt(page));
+                }
+            });
+
+            this.elements.brandPagination.innerHTML = '';
+            this.elements.brandPagination.appendChild(nav);
+        }
+
+        selectBrand(brandId, brandName) {
+            this.selectedBrandId = brandId;
+            this.elements.brandDropdown.textContent = brandName;
+
+            // 드롭다운 닫기
+            const dropdown = bootstrap.Dropdown.getInstance(this.elements.brandDropdown);
+            if (dropdown) dropdown.hide();
+        }
+
+        setupFormSubmission() {
+            this.elements.form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.submitForm();
+            });
+        }
+
+        async submitForm() {
+            // 유효성 검사
+            const name = document.getElementById('name').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            if (!name) {
+                this.showError('페달 이름을 입력해주세요.');
+                return;
+            }
+
+            if (!this.selectedCategoryId) {
+                this.showError('카테고리를 선택해주세요.');
+                return;
+            }
+
+            if (!this.selectedBrandId) {
+                this.showError('브랜드를 선택해주세요.');
+                return;
+            }
+
+            this.showLoading();
+
+            try {
+                // 페달 생성
+                const pedalData = {
+                    name: name,
+                    description: description,
+                    brandId: this.selectedBrandId,
+                    categoryId: this.selectedCategoryId
+                };
+
+                const response = await postData('/pedal/add', pedalData);
+                const pedalId = response.pedalId;
+
+                // 이미지 업로드 (선택사항)
+                if (this.selectedImage) {
+                    const uploadResponse = await postData(`/pedal/${pedalId}/upload`);
+                    await fetch(uploadResponse.uploadUrl, {
+                        method: "PUT",
+                        body: this.selectedImage,
+                        headers: { "Content-Type": this.selectedImage.type }
+                    });
+                    await postData(`/pedal/${pedalId}/upload/success`, {
+                        objectKey: uploadResponse.objectKey
+                    });
+                }
+
+                // 성공 시 페달 상세 페이지로 이동
+                window.location.href = `/pedal/${pedalId}`;
+
+            } catch (error) {
+                console.error('페달 생성 실패:', error);
+                this.showError(error.message || '페달 생성 중 오류가 발생했습니다.');
+                this.hideLoading();
+            }
+        }
+
+        showLoading() {
+            this.elements.form.style.display = 'none';
+            this.elements.loading.style.display = 'block';
+            this.elements.error.style.display = 'none';
+        }
+
+        hideLoading() {
+            this.elements.form.style.display = 'block';
+            this.elements.loading.style.display = 'none';
+        }
+
+        showError(message) {
+            this.elements.error.textContent = message;
+            this.elements.error.style.display = 'block';
+            this.elements.form.style.display = 'block';
+            this.elements.loading.style.display = 'none';
+        }
+    }
+
+    // 페이지 로드 시 초기화
+    window.addEventListener('DOMContentLoaded', () => {
+        new AddPedalManager();
+    });
 </script>
 </body>
 </html>
