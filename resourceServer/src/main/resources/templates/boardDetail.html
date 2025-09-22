@@ -328,7 +328,17 @@
                     <div class="spinner-border text-primary" role="status"></div>
                     <p class="mt-2">카테고리를 불러오는 중...</p>
                 </div>
-                <div id="categoryContainer" class="d-flex flex-wrap gap-2 mb-3" style="display: none;"></div>
+                <div id="categoryContainer" style="display: none;">
+                    <!-- 카테고리 드롭다운 -->
+                    <div class="dropdown mb-3">
+                        <button class="btn btn-outline-primary dropdown-toggle w-100" type="button"
+                                id="categoryDropdown" data-bs-toggle="dropdown">
+                            카테고리를 선택하세요
+                        </button>
+                        <ul class="dropdown-menu w-100" id="categoryDropdownMenu">
+                        </ul>
+                    </div>
+                </div>
                 <div id="pedalContainer" class="row g-3"></div>
                 <div id="paginationContainer" class="d-flex justify-content-center mt-3"></div>
             </div>
@@ -428,9 +438,7 @@
                         <p id="boardDescriptionDisplay">
                             ${info.boardDescription || '보드에 대한 설명이 없습니다.'}
                         </p>
-                        <textarea id="boardDescriptionInput" class="form-control editable-field" rows="5">
-                            ${info.boardDescription || ''}
-                        </textarea>
+                        <textarea id="boardDescriptionInput" class="form-control editable-field" rows="5">${info.boardDescription || ''}</textarea>
                     </div>
                     <p class="text-muted small">
                         <i class="fas fa-calendar-alt me-2"></i>생성일:
@@ -660,13 +668,16 @@
                         .filter(el => el.classList.contains('pedal-item-card'))
                         .indexOf(this.draggedElement);
 
-                    if (newIndex !== currentIndex && newIndex !== currentIndex + 1) {
-                        await postData(`/board/${this.boardId}/move`, {
-                            pedalId: parseInt(fromPedalId),
-                            destination: newIndex > currentIndex ? newIndex - 1 : newIndex
-                        });
-                        alert('페달이 성공적으로 이동되었습니다.');
+                    // 양옆 위치로의 이동은 무시
+                    if (newIndex === currentIndex || newIndex === currentIndex + 1) {
+                        return;
                     }
+
+                    await postData(`/board/${this.boardId}/move`, {
+                        pedalId: parseInt(fromPedalId),
+                        destination: newIndex > currentIndex ? newIndex - 1 : newIndex
+                    });
+                    alert('페달이 성공적으로 이동되었습니다.');
                 }
                 window.location.reload();
             } catch (error) {
@@ -712,7 +723,6 @@
 
         async openAddPedalModal(index) {
             this.selectedInsertionIndex = index;
-            this.elements.categoryContainer.innerHTML = '';
             this.elements.pedalContainer.innerHTML = '';
             this.elements.paginationContainer.innerHTML = '';
             this.elements.modalLoading.style.display = 'block';
@@ -724,25 +734,55 @@
                 const categories = await getData('/api/categories');
                 this.renderCategories(categories);
             } catch (error) {
-                this.elements.categoryContainer.innerHTML = '<p class="text-danger text-center">카테고리 로딩 실패</p>';
+                document.getElementById('categoryDropdownMenu').innerHTML = '<li><span class="dropdown-item-text text-danger">카테고리 로딩 실패</span></li>';
             } finally {
                 this.elements.modalLoading.style.display = 'none';
-                this.elements.categoryContainer.style.display = 'flex';
+                this.elements.categoryContainer.style.display = 'block';
             }
         }
 
         renderCategories(categories) {
-            categories.forEach(category => {
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-outline-primary btn-sm';
-                btn.textContent = category.categoryName;
-                btn.addEventListener('click', () => this.loadPedals(category.categoryId, 0));
-                this.elements.categoryContainer.appendChild(btn);
+            const dropdownMenu = document.getElementById('categoryDropdownMenu');
+            const dropdownToggle = document.getElementById('categoryDropdown');
 
-                if (category.children?.length > 0) {
-                    this.renderCategories(category.children);
-                }
+            dropdownMenu.innerHTML = '';
+
+            categories.forEach(category => {
+                this.createCategoryMenuItem(category, dropdownMenu, dropdownToggle);
             });
+        }
+
+        createCategoryMenuItem(category, parentElement, dropdownToggle, level = 0) {
+            const li = document.createElement('li');
+
+            if (category.children && category.children.length > 0) {
+                // 하위 카테고리가 있는 경우 - 드롭다운
+                li.innerHTML = `
+                    <div class="dropdown-item-text fw-bold" style="padding-left: ${level * 20}px;">
+                        <i class="fas fa-folder me-2"></i>${category.categoryName}
+                    </div>
+                `;
+                parentElement.appendChild(li);
+
+                // 하위 카테고리들 추가
+                category.children.forEach(child => {
+                    this.createCategoryMenuItem(child, parentElement, dropdownToggle, level + 1);
+                });
+            } else {
+                // 하위 카테고리가 없는 경우 - 클릭 가능한 아이템
+                li.innerHTML = `
+                    <button class="dropdown-item" style="padding-left: ${level * 20}px;" data-category-id="${category.categoryId}">
+                        <i class="fas fa-tag me-2"></i>${category.categoryName}
+                    </button>
+                `;
+
+                li.addEventListener('click', () => {
+                    dropdownToggle.textContent = category.categoryName;
+                    this.loadPedals(category.categoryId, 0);
+                });
+
+                parentElement.appendChild(li);
+            }
         }
 
         async loadPedals(categoryId, page = 0) {
@@ -822,7 +862,8 @@
                     index: this.selectedInsertionIndex
                 });
 
-                this.currentBoardData.chain.pedals = response.chain.pedals;
+                // API 응답에서 chain이 없고 바로 pedals 배열이 올 경우 대응
+                this.currentBoardData.chain.pedals = response.chain ? response.chain.pedals : response.pedals;
                 this.renderPedalList();
                 this.elements.modal.hide();
                 alert('페달이 보드에 추가되었습니다!');
