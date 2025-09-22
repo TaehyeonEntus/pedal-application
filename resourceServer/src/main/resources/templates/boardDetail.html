@@ -862,8 +862,7 @@
                     index: this.selectedInsertionIndex
                 });
 
-                // API 응답에서 chain이 없고 바로 pedals 배열이 올 경우 대응
-                this.currentBoardData.chain.pedals = response.chain ? response.chain.pedals : response.pedals;
+                this.currentBoardData.chain.pedals = response.pedals;
                 this.renderPedalList();
                 this.elements.modal.hide();
                 alert('페달이 보드에 추가되었습니다!');
