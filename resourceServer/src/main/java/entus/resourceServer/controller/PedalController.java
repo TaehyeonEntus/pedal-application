@@ -8,9 +8,9 @@ import entus.resourceServer.domain.Pedal;
 import entus.resourceServer.domain.dto.request.AddPedalRequestDto;
 import entus.resourceServer.domain.dto.request.UploadImageSuccessRequestDto;
 import entus.resourceServer.domain.dto.response.AddPedalResponseDto;
+import entus.resourceServer.domain.dto.response.ApiResponse;
 import entus.resourceServer.domain.dto.response.PresignedUrlResponseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -36,8 +36,8 @@ public class PedalController {
     }
 
     @PostMapping("/{pedalId}/upload/success")
-    public ResponseEntity<?> uploadImageSuccess(@PathVariable Long pedalId, @RequestBody UploadImageSuccessRequestDto dto) {
+    public ApiResponse uploadImageSuccess(@PathVariable Long pedalId, @RequestBody UploadImageSuccessRequestDto dto) {
         r2Service.setPedalImageUrl(pedalId, dto.getObjectKey());
-        return ResponseEntity.ok().body("upload success");
+        return new ApiResponse("upload success");
     }
 }
