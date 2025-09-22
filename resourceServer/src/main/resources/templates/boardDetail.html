@@ -206,15 +206,9 @@
         }
 
         @keyframes shake {
-            0%, 100% {
-                transform: rotate(0deg);
-            }
-            25% {
-                transform: rotate(5deg);
-            }
-            75% {
-                transform: rotate(-5deg);
-            }
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
         }
 
         .editable-field {
@@ -354,8 +348,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script type="module">
-    import {getData, postData} from "/js/api.js";
-    import {getImageUrl} from "/js/getImageUrl.js";
+    import { getData, postData } from "/js/api.js";
+    import { getImageUrl } from "/js/getImageUrl.js";
 
     class BoardDetailManager {
         constructor() {
@@ -432,17 +426,20 @@
                      src="${getImageUrl(info.boardImageUrl)}">
                 <input type="file" id="boardImageInput" style="display:none;" accept="image/*">
                 <div class="text-center text-md-start">
+                    <h1 id="boardNameDisplay" class="display-5 fw-bold text-dark d-inline-block">
+                        ${info.boardName || '보드 이름'}
+                    </h1>
                     <input type="text" id="boardNameInput" class="form-control editable-field"
                            value="${info.boardName || ''}">
+                    <p class="lead text-muted">
+                        <i class="fas fa-user me-2"></i>작성자: ${info.boardOwner || '-'}
+                    </p>
                     <div class="mt-3 text-dark">
                         <p id="boardDescriptionDisplay">
                             ${info.boardDescription || '보드에 대한 설명이 없습니다.'}
                         </p>
                         <textarea id="boardDescriptionInput" class="form-control editable-field" rows="5">${info.boardDescription || ''}</textarea>
                     </div>
-                    <p class="lead text-muted">
-                        <i class="fas fa-user me-2"></i>작성자: ${info.boardOwner || '-'}
-                    </p>
                     <p class="text-muted small">
                         <i class="fas fa-calendar-alt me-2"></i>생성일:
                         ${new Date(info.createdAt).toLocaleDateString('ko-KR', {
@@ -543,12 +540,7 @@
                 editControls.style.display = 'inline-block';
             });
 
-            saveBtn.addEventListener('click', () => {
-                this.saveBoardChanges()
-                this.toggleEditMode(false);
-                editBtn.style.display = 'inline-block';
-                editControls.style.display = 'none';
-            });
+            saveBtn.addEventListener('click', () => this.saveBoardChanges());
             cancelBtn.addEventListener('click', () => {
                 this.toggleEditMode(false);
                 editBtn.style.display = 'inline-block';
@@ -599,18 +591,18 @@
 
             try {
                 if (imageFile) {
-                    const {uploadUrl, objectKey} = await postData(`/board/${this.boardId}/upload`);
+                    const { uploadUrl, objectKey } = await postData(`/board/${this.boardId}/upload`);
                     await fetch(uploadUrl, {
                         method: "PUT",
                         body: imageFile,
-                        headers: {"Content-Type": imageFile.type}
+                        headers: { "Content-Type": imageFile.type }
                     });
-                    await postData(`/board/${this.boardId}/upload/success`, {objectKey});
+                    await postData(`/board/${this.boardId}/upload/success`, { objectKey });
                 }
 
-                this.currentBoardData.info = await postData(`/board/${this.boardId}/update`, {name, description});
+                await postData(`/board/${this.boardId}/update`, { name, description });
                 alert('보드가 성공적으로 수정되었습니다.');
-                this.renderBoardInfo();
+                window.location.reload();
             } catch (error) {
                 console.error("보드 수정 실패:", error);
                 alert('수정 중 오류가 발생했습니다.');
@@ -665,11 +657,10 @@
             try {
                 if (target.classList.contains('pedal-item-card')) {
                     const toPedalId = target.dataset.pedalId;
-                    const response = await postData(`/board/${this.boardId}/swap`, {
+                    await postData(`/board/${this.boardId}/swap`, {
                         pedal1Id: parseInt(fromPedalId),
                         pedal2Id: parseInt(toPedalId)
                     });
-                    this.currentBoardData.chain.pedals = response.pedals;
                     alert('페달이 성공적으로 교체되었습니다.');
                 } else if (target.classList.contains('add-pedal-btn')) {
                     const newIndex = parseInt(target.dataset.index);
@@ -682,14 +673,13 @@
                         return;
                     }
 
-                    const response = await postData(`/board/${this.boardId}/move`, {
+                    await postData(`/board/${this.boardId}/move`, {
                         pedalId: parseInt(fromPedalId),
                         destination: newIndex > currentIndex ? newIndex - 1 : newIndex
                     });
-                    this.currentBoardData.chain.pedals = response.pedals;
                     alert('페달이 성공적으로 이동되었습니다.');
                 }
-                this.renderPedalList();
+                window.location.reload();
             } catch (error) {
                 console.error("페달 조작 실패:", error);
                 alert('작업에 실패했습니다.');
@@ -721,9 +711,9 @@
 
             if (confirm('정말 이 페달을 삭제하시겠습니까?')) {
                 try {
-                    const response = await postData(`/board/${this.boardId}/delete`, {pedalId: parseInt(pedalId)});
-                    this.currentBoardData.chain.pedals = response.pedals;
+                    await postData(`/board/${this.boardId}/delete`, { pedalId: parseInt(pedalId) });
                     alert('페달이 성공적으로 삭제되었습니다.');
+                    window.location.reload();
                 } catch (error) {
                     console.error("페달 삭제 실패:", error);
                     alert('삭제에 실패했습니다.');
@@ -872,7 +862,7 @@
                     index: this.selectedInsertionIndex
                 });
 
-                this.currentBoardData.chain.pedals = response.pedals;
+                this.currentBoardData.chain.pedals = response.chain ? response.chain.pedals : response.pedals;
                 this.renderPedalList();
                 this.elements.modal.hide();
                 alert('페달이 보드에 추가되었습니다!');
