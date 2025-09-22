@@ -6,7 +6,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* 기존 스타일 그대로 유지 */
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -155,6 +154,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border: none;
         }
 
@@ -256,9 +256,12 @@
     </style>
 </head>
 <body>
+
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand" href="/home"><i class="fas fa-music me-2"></i>Pedal App</a>
+        <a class="navbar-brand" href="/home">
+            <i class="fas fa-music me-2"></i>Pedal App
+        </a>
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="/home"><i class="fas fa-home me-1"></i>Home</a>
             <a class="nav-link" href="/boards"><i class="fas fa-th-large me-1"></i>Pedal Boards</a>
@@ -273,11 +276,16 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <span><i class="fas fa-info-circle me-2"></i>보드 상세 정보</span>
             <div id="boardControls" style="display:none;">
-                <button id="editBtn" class="btn btn-primary btn-sm"><i class="fas fa-edit me-1"></i>수정</button>
+                <button id="editBtn" class="btn btn-primary btn-sm">
+                    <i class="fas fa-edit me-1"></i>수정
+                </button>
                 <div id="editControls" style="display:none;">
-                    <button id="saveBtn" class="btn btn-success btn-sm me-2"><i class="fas fa-check me-1"></i>저장
+                    <button id="saveBtn" class="btn btn-success btn-sm me-2">
+                        <i class="fas fa-check me-1"></i>저장
                     </button>
-                    <button id="cancelBtn" class="btn btn-secondary btn-sm"><i class="fas fa-times me-1"></i>취소</button>
+                    <button id="cancelBtn" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-times me-1"></i>취소
+                    </button>
                 </div>
             </div>
         </div>
@@ -285,10 +293,6 @@
             <div id="boardLoading" class="loading-spinner">
                 <div class="spinner-border text-primary" role="status"></div>
                 <p class="mt-2 text-muted">보드 정보를 불러오는 중...</p>
-            </div>
-            <div id="boardSaving" class="loading-spinner" style="display:none;">
-                <div class="spinner-border text-success" role="status"></div>
-                <p class="mt-2 text-muted">보드 정보를 저장 중...</p>
             </div>
             <div id="boardContent" style="display: none;"></div>
         </div>
@@ -331,12 +335,14 @@
                     <p class="mt-2">카테고리를 불러오는 중...</p>
                 </div>
                 <div id="categoryContainer" style="display: none;">
+                    <!-- 카테고리 드롭다운 -->
                     <div class="dropdown mb-3">
                         <button class="btn btn-outline-primary dropdown-toggle w-100" type="button"
                                 id="categoryDropdown" data-bs-toggle="dropdown">
                             카테고리를 선택하세요
                         </button>
-                        <ul class="dropdown-menu w-100" id="categoryDropdownMenu"></ul>
+                        <ul class="dropdown-menu w-100" id="categoryDropdownMenu">
+                        </ul>
                     </div>
                 </div>
                 <div id="pedalContainer" class="row g-3"></div>
@@ -382,9 +388,14 @@
                 const response = await getData(`/api/board/${this.boardId}`);
                 this.isOwner = response.owner;
                 this.currentBoardData = response.boardDetail;
+
                 this.renderBoardInfo();
                 this.renderPedalList();
-                if (this.isOwner) this.setupOwnerFeatures();
+
+                if (this.isOwner) {
+                    this.setupOwnerFeatures();
+                }
+
                 this.hideLoading();
             } catch (error) {
                 console.error("데이터 로딩 실패:", error);
@@ -416,37 +427,34 @@
         renderBoardInfo() {
             const info = this.currentBoardData.info;
             this.elements.boardContent.innerHTML = `
-            <img id="boardImage" alt="Board Image"
-                 class="board-img ${this.isOwner ? 'editable' : ''} mb-3 me-md-4"
-                 src="${getImageUrl(info.boardImageUrl)}">
-            <input type="file" id="boardImageInput" style="display:none;" accept="image/*">
-            <div class="text-center text-md-start">
-                <h1 id="boardNameDisplay" class="display-5 fw-bold text-dark d-inline-block">
-                    ${info.boardName || '보드 이름'}
-                </h1>
-                <input type="text" id="boardNameInput" class="form-control editable-field"
-                       value="${info.boardName || ''}">
-                <p class="lead text-muted">
-                    <i class="fas fa-user me-2"></i>작성자: ${info.boardOwner || '-'}
-                </p>
-                <div class="mt-3 text-dark">
-                    <p id="boardDescriptionDisplay">
-                        ${info.boardDescription || '보드에 대한 설명이 없습니다.'}
+                <img id="boardImage" alt="Board Image"
+                     class="board-img ${this.isOwner ? 'editable' : ''} mb-3 me-md-4"
+                     src="${getImageUrl(info.boardImageUrl)}">
+                <input type="file" id="boardImageInput" style="display:none;" accept="image/*">
+                <div class="text-center text-md-start">
+                    <h1 id="boardNameDisplay" class="display-5 fw-bold text-dark d-inline-block">
+                        ${info.boardName || '보드 이름'}
+                    </h1>
+                    <input type="text" id="boardNameInput" class="form-control editable-field"
+                           value="${info.boardName || ''}">
+                    <p class="lead text-muted">
+                        <i class="fas fa-user me-2"></i>작성자: ${info.boardOwner || '-'}
                     </p>
-                    <textarea id="boardDescriptionInput" class="form-control editable-field" rows="5">${info.boardDescription || ''}</textarea>
-                </div>
-                <p class="text-muted small">
-                    <i class="fas fa-calendar-alt me-2"></i>생성일:
-                    ${new Date(info.createdAt).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+                    <div class="mt-3 text-dark">
+                        <p id="boardDescriptionDisplay">
+                            ${info.boardDescription || '보드에 대한 설명이 없습니다.'}
+                        </p>
+                        <textarea id="boardDescriptionInput" class="form-control editable-field" rows="5">${info.boardDescription || ''}</textarea>
+                    </div>
+                    <p class="text-muted small">
+                        <i class="fas fa-calendar-alt me-2"></i>생성일:
+                        ${new Date(info.createdAt).toLocaleDateString('ko-KR', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             })}
-                </p>
-            </div>
-        `;
+                    </p>
+                </div>
+            `;
         }
 
         renderPedalList() {
@@ -461,125 +469,422 @@
 
             this.elements.emptyMessage.style.display = 'none';
 
+            // 첫 번째 추가 버튼 (소유자인 경우)
             if (this.isOwner) {
-                pedals.forEach((pedal, idx) => {
-                    const pedalCard = this.createPedalCard(pedal, idx);
-                    this.elements.pedalList.appendChild(pedalCard);
-                });
-                const addBtn = this.createAddPedalButton();
-                this.elements.pedalList.appendChild(addBtn);
-            } else {
-                pedals.forEach(pedal => {
-                    const pedalCard = this.createPedalCard(pedal);
-                    this.elements.pedalList.appendChild(pedalCard);
-                });
+                this.createAddButton(0);
             }
-        }
 
-        createPedalCard(pedal, idx = null) {
-            const card = document.createElement('div');
-            card.classList.add('pedal-item-card');
-            card.setAttribute('draggable', !!this.isOwner);
-            card.dataset.pedalId = pedal.pedalId;
+            // 페달 카드들
+            pedals.forEach((pedal, index) => {
+                this.createPedalCard(pedal, index);
 
-            card.innerHTML = `
-            <img src="${getImageUrl(pedal.imageUrl)}" alt="${pedal.pedalName}" class="pedal-img">
-            <div class="pedal-info">
-                <strong>${pedal.pedalName}</strong>
-                <p class="text-muted mb-0">${pedal.brandName || ''}</p>
-            </div>
-            ${this.isOwner ? '<div class="clickable-hint"><i class="fas fa-arrows-alt"></i></div>' : ''}
-        `;
-
-            if (this.isOwner) this.setupDragEvents(card, idx);
-            return card;
-        }
-
-        createAddPedalButton() {
-            const btn = document.createElement('button');
-            btn.classList.add('add-pedal-btn');
-            btn.innerHTML = '<i class="fas fa-plus"></i>';
-            btn.addEventListener('click', () => this.elements.modal.show());
-            return btn;
-        }
-
-        setupOwnerFeatures() {
-            this.elements.boardControls.style.display = 'flex';
-            document.getElementById('editBtn').addEventListener('click', () => this.toggleEdit(true));
-            document.getElementById('cancelBtn').addEventListener('click', () => this.toggleEdit(false));
-            document.getElementById('saveBtn').addEventListener('click', () => this.saveBoard());
-            this.elements.trashCan.addEventListener('dragover', e => e.preventDefault());
-            this.elements.trashCan.addEventListener('drop', e => this.deletePedal(e));
-        }
-
-        toggleEdit(enable) {
-            const displayEls = [document.getElementById('boardNameDisplay'), document.getElementById('boardDescriptionDisplay')];
-            const inputEls = [document.getElementById('boardNameInput'), document.getElementById('boardDescriptionInput')];
-            displayEls.forEach(el => el.style.display = enable ? 'none' : 'block');
-            inputEls.forEach(el => el.style.display = enable ? 'block' : 'none');
-            document.getElementById('editControls').style.display = enable ? 'block' : 'none';
-            document.getElementById('editBtn').style.display = enable ? 'none' : 'inline-block';
-        }
-
-        async saveBoard() {
-            this.elements.boardSaving.style.display = 'block';
-            const data = {
-                boardName: document.getElementById('boardNameInput').value,
-                boardDescription: document.getElementById('boardDescriptionInput').value
-            };
-            try {
-                await postData(`/api/board/${this.boardId}`, data);
-                this.currentBoardData.info.boardName = data.boardName;
-                this.currentBoardData.info.boardDescription = data.boardDescription;
-                this.renderBoardInfo();
-                this.toggleEdit(false);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                this.elements.boardSaving.style.display = 'none';
-            }
-        }
-
-        setupDragEvents(card, idx) {
-            card.addEventListener('dragstart', e => {
-                this.draggedElement = card;
-                card.classList.add('dragging');
-                this.elements.trashCan.classList.add('active');
-            });
-            card.addEventListener('dragend', e => {
-                this.draggedElement = null;
-                card.classList.remove('dragging');
-                this.elements.trashCan.classList.remove('active');
-            });
-            card.addEventListener('dragover', e => {
-                e.preventDefault();
-                card.classList.add('drag-over');
-            });
-            card.addEventListener('dragleave', e => {
-                card.classList.remove('drag-over');
-            });
-            card.addEventListener('drop', e => {
-                e.preventDefault();
-                card.classList.remove('drag-over');
-                if (this.draggedElement && this.draggedElement !== card) {
-                    const list = this.elements.pedalList;
-                    list.insertBefore(this.draggedElement, card.nextSibling);
+                if (this.isOwner) {
+                    this.createAddButton(index + 1);
+                } else if (index < pedals.length - 1) {
+                    this.createArrow();
                 }
             });
         }
 
-        deletePedal(e) {
-            e.preventDefault();
+        createPedalCard(pedal, index) {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = `pedal-item-card ${this.isOwner ? 'editable' : ''}`;
+            cardDiv.dataset.pedalId = pedal.pedalId;
+            cardDiv.draggable = this.isOwner;
+
+            cardDiv.innerHTML = `
+                <div class="clickable-hint">
+                    <i class="fas ${this.isOwner ? 'fa-arrows-alt' : 'fa-eye'}"></i>
+                </div>
+                <img src="${getImageUrl(pedal.pedalImageUrl)}" alt="Pedal Image" class="pedal-img">
+                <div class="pedal-info">
+                    <h6 class="card-title fw-bold">${pedal.pedalName || '-'}</h6>
+                    <span class="badge bg-primary">${pedal.categoryName || '-'}</span>
+                </div>
+            `;
+
+            if (!this.isOwner) {
+                cardDiv.addEventListener('click', () => {
+                    window.location.href = `/pedal/${pedal.pedalId}`;
+                });
+            }
+
+            this.elements.pedalList.appendChild(cardDiv);
+        }
+
+        createAddButton(index) {
+            const btn = document.createElement('button');
+            btn.className = 'add-pedal-btn';
+            btn.innerHTML = '<i class="fas fa-plus"></i>';
+            btn.dataset.index = index;
+            btn.addEventListener('click', () => this.openAddPedalModal(index));
+            this.elements.pedalList.appendChild(btn);
+        }
+
+        createArrow() {
+            const arrow = document.createElement('span');
+            arrow.className = 'pedal-arrow';
+            arrow.innerHTML = '<i class="fas fa-long-arrow-alt-right"></i>';
+            this.elements.pedalList.appendChild(arrow);
+        }
+
+        setupOwnerFeatures() {
+            this.elements.boardControls.style.display = 'flex';
+            this.setupBoardEdit();
+            this.setupDragDrop();
+        }
+
+        setupBoardEdit() {
+            const editBtn = document.getElementById('editBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const editControls = document.getElementById('editControls');
+
+            editBtn.addEventListener('click', () => {
+                this.toggleEditMode(true);
+                editBtn.style.display = 'none';
+                editControls.style.display = 'inline-block';
+            });
+
+            saveBtn.addEventListener('click', () => this.saveBoardChanges());
+            cancelBtn.addEventListener('click', () => {
+                this.toggleEditMode(false);
+                editBtn.style.display = 'inline-block';
+                editControls.style.display = 'none';
+            });
+        }
+
+        toggleEditMode(isEditing) {
+            const elements = {
+                nameDisplay: document.getElementById('boardNameDisplay'),
+                nameInput: document.getElementById('boardNameInput'),
+                descDisplay: document.getElementById('boardDescriptionDisplay'),
+                descInput: document.getElementById('boardDescriptionInput'),
+                image: document.getElementById('boardImage'),
+                imageInput: document.getElementById('boardImageInput')
+            };
+
+            if (isEditing) {
+                elements.nameDisplay.style.display = 'none';
+                elements.nameInput.style.display = 'block';
+                elements.descDisplay.style.display = 'none';
+                elements.descInput.style.display = 'block';
+                elements.image.addEventListener('click', () => elements.imageInput.click());
+                elements.imageInput.addEventListener('change', this.handleImagePreview);
+            } else {
+                elements.nameDisplay.style.display = 'inline-block';
+                elements.nameInput.style.display = 'none';
+                elements.descDisplay.style.display = 'block';
+                elements.descInput.style.display = 'none';
+            }
+        }
+
+        handleImagePreview = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('boardImage').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async saveBoardChanges() {
+            const name = document.getElementById('boardNameInput').value;
+            const description = document.getElementById('boardDescriptionInput').value;
+            const imageFile = document.getElementById('boardImageInput').files[0];
+
+            try {
+                if (imageFile) {
+                    const {uploadUrl, objectKey} = await postData(`/board/${this.boardId}/upload`);
+                    await fetch(uploadUrl, {
+                        method: "PUT",
+                        body: imageFile,
+                        headers: {"Content-Type": imageFile.type}
+                    });
+                    await postData(`/board/${this.boardId}/upload/success`, {objectKey});
+                }
+
+                this.currentBoardData.info = await postData(`/board/${this.boardId}/update`, {name, description});
+                alert('보드가 성공적으로 수정되었습니다.');
+                this.renderBoardInfo();
+            } catch (error) {
+                console.error("보드 수정 실패:", error);
+                alert('수정 중 오류가 발생했습니다.');
+            }
+        }
+
+        setupDragDrop() {
+            this.elements.pedalList.addEventListener('dragstart', this.handleDragStart.bind(this));
+            this.elements.pedalList.addEventListener('dragover', this.handleDragOver.bind(this));
+            this.elements.pedalList.addEventListener('dragleave', this.handleDragLeave.bind(this));
+            this.elements.pedalList.addEventListener('drop', this.handleDrop.bind(this));
+            this.elements.pedalList.addEventListener('dragend', this.handleDragEnd.bind(this));
+
+            this.elements.trashCan.addEventListener('dragover', this.handleTrashDragOver.bind(this));
+            this.elements.trashCan.addEventListener('dragleave', this.handleTrashDragLeave.bind(this));
+            this.elements.trashCan.addEventListener('drop', this.handleTrashDrop.bind(this));
+        }
+
+        handleDragStart(e) {
+            this.draggedElement = e.target.closest('.pedal-item-card');
             if (this.draggedElement) {
-                this.draggedElement.remove();
+                e.dataTransfer.setData('text/plain', this.draggedElement.dataset.pedalId);
+                setTimeout(() => {
+                    this.draggedElement.classList.add('dragging');
+                    this.elements.trashCan.classList.add('active');
+                }, 0);
+            }
+        }
+
+        handleDragOver(e) {
+            e.preventDefault();
+            const target = e.target.closest('.pedal-item-card, .add-pedal-btn');
+            if (target && target !== this.draggedElement) {
+                target.classList.add('drag-over');
+            }
+        }
+
+        handleDragLeave(e) {
+            const target = e.target.closest('.pedal-item-card, .add-pedal-btn');
+            if (target) {
+                target.classList.remove('drag-over');
+            }
+        }
+
+        async handleDrop(e) {
+            e.preventDefault();
+            const target = e.target.closest('.pedal-item-card, .add-pedal-btn');
+            if (!target || this.draggedElement === target) return;
+
+            const fromPedalId = this.draggedElement.dataset.pedalId;
+
+            try {
+                if (target.classList.contains('pedal-item-card')) {
+                    const toPedalId = target.dataset.pedalId;
+                    const response = await postData(`/board/${this.boardId}/swap`, {
+                        pedal1Id: parseInt(fromPedalId),
+                        pedal2Id: parseInt(toPedalId)
+                    });
+                    this.currentBoardData.chain.pedals = response.pedals;
+                    alert('페달이 성공적으로 교체되었습니다.');
+                } else if (target.classList.contains('add-pedal-btn')) {
+                    const newIndex = parseInt(target.dataset.index);
+                    const currentIndex = Array.from(this.elements.pedalList.children)
+                        .filter(el => el.classList.contains('pedal-item-card'))
+                        .indexOf(this.draggedElement);
+
+                    // 양옆 위치로의 이동은 무시
+                    if (newIndex === currentIndex || newIndex === currentIndex + 1) {
+                        return;
+                    }
+
+                    const response = await postData(`/board/${this.boardId}/move`, {
+                        pedalId: parseInt(fromPedalId),
+                        destination: newIndex > currentIndex ? newIndex - 1 : newIndex
+                    });
+                    this.currentBoardData.chain.pedals = response.pedals;
+                    alert('페달이 성공적으로 이동되었습니다.');
+                }
+                this.renderPedalList();
+            } catch (error) {
+                console.error("페달 조작 실패:", error);
+                alert('작업에 실패했습니다.');
+            }
+        }
+
+        handleDragEnd() {
+            if (this.draggedElement) {
+                this.draggedElement.classList.remove('dragging');
                 this.draggedElement = null;
-                this.elements.trashCan.classList.remove('active');
+            }
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            this.elements.trashCan.classList.remove('active');
+        }
+
+        handleTrashDragOver(e) {
+            e.preventDefault();
+            this.elements.trashCan.classList.add('drag-over');
+        }
+
+        handleTrashDragLeave() {
+            this.elements.trashCan.classList.remove('drag-over');
+        }
+
+        async handleTrashDrop(e) {
+            e.preventDefault();
+            const pedalId = e.dataTransfer.getData('text/plain');
+            this.elements.trashCan.classList.remove('drag-over');
+
+            if (confirm('정말 이 페달을 삭제하시겠습니까?')) {
+                try {
+                    const response = await postData(`/board/${this.boardId}/delete`, {pedalId: parseInt(pedalId)});
+                    this.currentBoardData.chain.pedals = response.pedals;
+                    alert('페달이 성공적으로 삭제되었습니다.');
+                } catch (error) {
+                    console.error("페달 삭제 실패:", error);
+                    alert('삭제에 실패했습니다.');
+                }
+            }
+        }
+
+        async openAddPedalModal(index) {
+            this.selectedInsertionIndex = index;
+            this.elements.pedalContainer.innerHTML = '';
+            this.elements.paginationContainer.innerHTML = '';
+            this.elements.modalLoading.style.display = 'block';
+            this.elements.categoryContainer.style.display = 'none';
+
+            this.elements.modal.show();
+
+            try {
+                const categories = await getData('/api/categories');
+                this.renderCategories(categories);
+            } catch (error) {
+                document.getElementById('categoryDropdownMenu').innerHTML = '<li><span class="dropdown-item-text text-danger">카테고리 로딩 실패</span></li>';
+            } finally {
+                this.elements.modalLoading.style.display = 'none';
+                this.elements.categoryContainer.style.display = 'block';
+            }
+        }
+
+        renderCategories(categories) {
+            const dropdownMenu = document.getElementById('categoryDropdownMenu');
+            const dropdownToggle = document.getElementById('categoryDropdown');
+
+            dropdownMenu.innerHTML = '';
+
+            categories.forEach(category => {
+                this.createCategoryMenuItem(category, dropdownMenu, dropdownToggle);
+            });
+        }
+
+        createCategoryMenuItem(category, parentElement, dropdownToggle, level = 0) {
+            const li = document.createElement('li');
+
+            if (category.children && category.children.length > 0) {
+                // 하위 카테고리가 있는 경우 - 드롭다운
+                li.innerHTML = `
+                    <div class="dropdown-item-text fw-bold" style="padding-left: ${level * 20}px;">
+                        <i class="fas fa-folder me-2"></i>${category.categoryName}
+                    </div>
+                `;
+                parentElement.appendChild(li);
+
+                // 하위 카테고리들 추가
+                category.children.forEach(child => {
+                    this.createCategoryMenuItem(child, parentElement, dropdownToggle, level + 1);
+                });
+            } else {
+                // 하위 카테고리가 없는 경우 - 클릭 가능한 아이템
+                li.innerHTML = `
+                    <button class="dropdown-item" style="padding-left: ${level * 20}px;" data-category-id="${category.categoryId}">
+                        <i class="fas fa-tag me-2"></i>${category.categoryName}
+                    </button>
+                `;
+
+                li.addEventListener('click', () => {
+                    dropdownToggle.textContent = category.categoryName;
+                    this.loadPedals(category.categoryId, 0);
+                });
+
+                parentElement.appendChild(li);
+            }
+        }
+
+        async loadPedals(categoryId, page = 0) {
+            this.elements.pedalContainer.innerHTML = '';
+            this.elements.paginationContainer.innerHTML = '';
+            this.elements.modalLoading.style.display = 'block';
+
+            try {
+                const response = await getData(`/api/pedals/category/${categoryId}?page=${page}`);
+
+                if (response.pedals.length === 0) {
+                    this.elements.pedalContainer.innerHTML = '<p class="text-muted text-center mt-4">해당 카테고리에 페달이 없습니다.</p>';
+                } else {
+                    this.renderModalPedals(response.pedals);
+                    this.renderPagination(response.totalPage, response.currentPage, categoryId);
+                }
+            } catch (error) {
+                this.elements.pedalContainer.innerHTML = '<p class="text-danger text-center mt-4">페달 로딩 실패</p>';
+            } finally {
+                this.elements.modalLoading.style.display = 'none';
+            }
+        }
+
+        renderModalPedals(pedals) {
+            pedals.forEach(pedal => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3';
+                col.innerHTML = `
+                    <div class="card h-100 modal-pedal-card" data-pedal-id="${pedal.pedalId}">
+                        <img src="${getImageUrl(pedal.pedalImageUrl)}" class="card-img-top" alt="${pedal.pedalName}">
+                        <div class="card-body text-center p-2">
+                            <h6 class="card-title small">${pedal.pedalName}</h6>
+                            <small class="text-muted">${pedal.categoryName || ''}</small>
+                        </div>
+                    </div>
+                `;
+                col.addEventListener('click', () => this.insertPedal(pedal.pedalId));
+                this.elements.pedalContainer.appendChild(col);
+            });
+        }
+
+        renderPagination(totalPage, currentPage, categoryId) {
+            if (totalPage <= 1) return;
+
+            const nav = document.createElement('nav');
+            nav.innerHTML = `
+                <ul class="pagination pagination-sm">
+                    <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
+                        <button class="page-link" type="button" ${currentPage > 0 ? `data-page="${currentPage - 1}"` : ''}>이전</button>
+                    </li>
+                    ${Array.from({length: totalPage}, (_, i) => `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <button class="page-link" type="button" data-page="${i}">${i + 1}</button>
+                        </li>
+                    `).join('')}
+                    <li class="page-item ${currentPage === totalPage - 1 ? 'disabled' : ''}">
+                        <button class="page-link" type="button" ${currentPage < totalPage - 1 ? `data-page="${currentPage + 1}"` : ''}>다음</button>
+                    </li>
+                </ul>
+            `;
+
+            nav.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = e.target.dataset.page;
+                if (page !== undefined) {
+                    this.loadPedals(categoryId, parseInt(page));
+                }
+            });
+
+            this.elements.paginationContainer.appendChild(nav);
+        }
+
+        async insertPedal(pedalId) {
+            try {
+                const response = await postData(`/board/${this.boardId}/insert`, {
+                    pedalId: pedalId,
+                    index: this.selectedInsertionIndex
+                });
+
+                this.currentBoardData.chain.pedals = response.pedals;
+                this.renderPedalList();
+                this.elements.modal.hide();
+                alert('페달이 보드에 추가되었습니다!');
+            } catch (error) {
+                console.error("페달 추가 실패:", error);
+                alert('페달 추가에 실패했습니다.');
             }
         }
     }
 
-    // 초기화
-    document.addEventListener('DOMContentLoaded', () => new BoardDetailManager());
+    // 페이지 로드 시 초기화
+    window.addEventListener('DOMContentLoaded', () => {
+        new BoardDetailManager();
+    });
 </script>
 </body>
 </html>
